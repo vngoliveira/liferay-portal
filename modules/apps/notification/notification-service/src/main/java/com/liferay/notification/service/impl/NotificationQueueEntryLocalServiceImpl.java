@@ -27,9 +27,11 @@ import com.liferay.portal.kernel.service.ResourceLocalService;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.systemevent.SystemEvent;
 import com.liferay.portal.kernel.util.Portal;
+import com.liferay.portal.kernel.util.StringUtil;
 
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -104,6 +106,34 @@ public class NotificationQueueEntryLocalServiceImpl
 			_notificationRecipientSettingLocalService.
 				updateNotificationRecipientSetting(
 					notificationRecipientSetting);
+		}
+
+		String subject = notificationQueueEntry.getSubject();
+
+		String body = notificationQueueEntry.getBody();
+
+		if (Pattern.compile(
+				"\\d{4}-\\d{2}-\\d{2} 00:00:00.0"
+			).matcher(
+				subject
+			).find() ||
+			Pattern.compile(
+				"\\d{4}-\\d{2}-\\d{2} 00:00:00.0"
+			).matcher(
+				body
+			).find()) {
+
+			String[] newSubject = subject.split("00:00:00.0");
+
+			String[] newBody = body.split("00:00:00.0");
+
+			notificationQueueEntry.setSubject(
+				StringUtil.merge(newSubject, " "));
+
+			notificationQueueEntry.setBody(StringUtil.merge(newBody, " "));
+
+			notificationQueueEntry = notificationQueueEntryPersistence.update(
+				notificationQueueEntry);
 		}
 
 		return notificationQueueEntry;
