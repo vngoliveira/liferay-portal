@@ -276,8 +276,14 @@ AUI.add(
 
 					instance.items
 						.all(STR_DOT + CSS_CALENDAR_LIST_ITEM_ARROW)
-						.setAttribute('aria-expanded', false)
-						.setAttribute('aria-controls', simpleMenu.id);
+						.setAttribute('aria-expanded', false);
+
+					if (simpleMenu !== null) {
+						instance.items.setAttribute(
+							'aria-controls',
+							simpleMenu.id
+						);
+					}
 
 					contentBox.setContent(instance.items);
 				},
