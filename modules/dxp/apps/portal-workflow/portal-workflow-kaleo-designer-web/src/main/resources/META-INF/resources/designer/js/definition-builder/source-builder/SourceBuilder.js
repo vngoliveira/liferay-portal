@@ -29,6 +29,7 @@ export default function SourceBuilder() {
 	} = useContext(DefinitionBuilderContext);
 	const editorRef = useRef();
 	const [loading, setLoading] = useState(true);
+	const [showMessageLoading, setShowMessageLoading] = useState(false);
 	const [showImportSuccessMessage, setShowImportSuccessMessage] = useState(
 		false
 	);
@@ -37,35 +38,50 @@ export default function SourceBuilder() {
 	);
 
 	useEffect(() => {
-		if (currentEditor?.mode === 'source' && elements) {
-			const metadata = {
-				description: definitionDescription,
-				name: definitionName,
-				version,
-			};
+		function loadXmlContent() {
+			if (currentEditor?.mode === 'source' && elements) {
+				const metadata = {
+					description: definitionDescription,
+					name: definitionName,
+					version,
+				};
 
-			const xmlContent = serializeDefinition(
-				xmlNamespace,
-				metadata,
-				elements.filter(isNode),
-				elements.filter(isEdge)
-			);
+				const xmlContent = serializeDefinition(
+					xmlNamespace,
+					metadata,
+					elements.filter(isNode),
+					elements.filter(isEdge)
+				);
 
-			if (xmlContent) {
-				currentEditor.setData(xmlContent);
+				if (xmlContent) {
+					currentEditor.setData(xmlContent);
 
-				setLoading(false);
+					setLoading(false);
+
+					setShowMessageLoading(false);
+				}
+			}
+		}
+
+		if (loading) {
+			setShowMessageLoading(true);
+		}
+
+		if (currentEditor) {
+			setShowMessageLoading(true);
+			if (currentEditor.mode !== 'source') {
+				setTimeout(() => {
+					currentEditor.setMode('source');
+					loadXmlContent();
+				}, 20000);
+			}
+			else {
+				loadXmlContent();
 			}
 		}
 
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [currentEditor, definitionName, elements, version]);
-
-	useEffect(() => {
-		if (currentEditor && currentEditor.mode !== 'source') {
-			currentEditor.setMode('source');
-		}
-	}, [currentEditor]);
 
 	useEffect(() => {
 		if (showInvalidContentMessage) {
@@ -165,6 +181,17 @@ export default function SourceBuilder() {
 				}}
 				ref={editorRef}
 			/>
+
+			{showMessageLoading && (
+				<ClayAlert.ToastContainer>
+					<ClayAlert
+						displayType="info"
+						title={`${Liferay.Language.get('info')}:`}
+					>
+						Wait a few, the data is loading
+					</ClayAlert>
+				</ClayAlert.ToastContainer>
+			)}
 
 			{showImportSuccessMessage && (
 				<ClayAlert.ToastContainer>
