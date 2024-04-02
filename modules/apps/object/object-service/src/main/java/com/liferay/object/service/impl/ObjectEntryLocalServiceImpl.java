@@ -218,6 +218,7 @@ import java.util.Set;
 
 import javax.crypto.spec.SecretKeySpec;
 
+import com.liferay.portal.vulcan.dto.converter.DTOConverterContext;
 import org.apache.commons.io.IOUtils;
 
 import org.osgi.framework.BundleContext;
@@ -1149,7 +1150,18 @@ public class ObjectEntryLocalServiceImpl
 
 		return values;
 	}
+	@Override
+	public List<Map<String, Serializable>> getValuesList(
+		long groupId, long companyId, DTOConverterContext dtoConverterContext, long objectDefinitionId,
+		Predicate predicate, String search, int start, int end,
+		Sort[] sorts)
+		throws PortalException {
 
+		_restrictedFields = dtoConverterContext.getUriInfo().getQueryParameters();
+
+		return getValuesList(groupId, companyId, dtoConverterContext.getUserId(),
+			objectDefinitionId, predicate, search, start, end, sorts);
+	}
 	@Override
 	public List<Map<String, Serializable>> getValuesList(
 			long groupId, long companyId, long userId, long objectDefinitionId,
@@ -2407,11 +2419,17 @@ public class ObjectEntryLocalServiceImpl
 		ObjectDefinition objectDefinition =
 			_objectDefinitionPersistence.findByPrimaryKey(objectDefinitionId);
 
+		String test = _restrictedFields.values().toString();
+
+		List<ObjectField> objectFieldList = _objectFieldLocalService.getObjectFields(
+				objectDefinitionId, objectDefinition.getDBTableName());
+
+		objectFieldList.removeIf(
+			objectField -> test.contains(objectField.getName())
+		);
+
 		return new DynamicObjectDefinitionTable(
-			objectDefinition,
-			_objectFieldLocalService.getObjectFields(
-				objectDefinitionId, objectDefinition.getDBTableName()),
-			objectDefinition.getDBTableName());
+			objectDefinition, objectFieldList, objectDefinition.getDBTableName());
 	}
 
 	private DynamicObjectDefinitionTable
@@ -4877,5 +4895,7 @@ public class ObjectEntryLocalServiceImpl
 
 	@Reference
 	private WorkflowInstanceLinkLocalService _workflowInstanceLinkLocalService;
+
+	private Map<String, List<String>> _restrictedFields;
 
 }

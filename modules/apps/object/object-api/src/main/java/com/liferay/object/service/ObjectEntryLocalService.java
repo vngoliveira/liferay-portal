@@ -38,6 +38,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import com.liferay.portal.vulcan.dto.converter.DTOConverterContext;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -447,6 +448,13 @@ public interface ObjectEntryLocalService
 			long groupId, long companyId, long userId, long objectDefinitionId,
 			Predicate predicate, String search, int start, int end,
 			Sort[] sorts)
+		throws PortalException;
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public List<Map<String, Serializable>> getValuesList(
+		long groupId, long companyId, DTOConverterContext dtoConverterContext, long objectDefinitionId,
+		Predicate predicate, String search, int start, int end,
+		Sort[] sorts)
 		throws PortalException;
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)

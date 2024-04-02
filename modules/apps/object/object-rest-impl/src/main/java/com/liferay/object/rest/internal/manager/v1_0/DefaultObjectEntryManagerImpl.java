@@ -438,7 +438,7 @@ public class DefaultObjectEntryManagerImpl
 			facets,
 			TransformUtil.transform(
 				objectEntryLocalService.getValuesList(
-					groupId, companyId, dtoConverterContext.getUserId(),
+					groupId, companyId, dtoConverterContext,
 					objectDefinition.getObjectDefinitionId(), predicate, search,
 					start, end, sorts),
 				values -> _getObjectEntry(

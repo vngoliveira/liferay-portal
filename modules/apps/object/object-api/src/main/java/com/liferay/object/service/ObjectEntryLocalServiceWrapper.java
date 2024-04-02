@@ -7,6 +7,7 @@ package com.liferay.object.service;
 
 import com.liferay.portal.kernel.service.ServiceWrapper;
 import com.liferay.portal.kernel.service.persistence.BasePersistence;
+import com.liferay.portal.vulcan.dto.converter.DTOConverterContext;
 
 /**
  * Provides a wrapper for {@link ObjectEntryLocalService}.
@@ -664,6 +665,21 @@ public class ObjectEntryLocalServiceWrapper
 
 		return _objectEntryLocalService.getValuesList(
 			groupId, companyId, userId, objectDefinitionId, predicate, search,
+			start, end, sorts);
+	}
+
+	@Override
+	public java.util.List<java.util.Map<String, java.io.Serializable>>
+	getValuesList(
+		long groupId, long companyId, DTOConverterContext dtoConverterContext,
+		long objectDefinitionId,
+		com.liferay.petra.sql.dsl.expression.Predicate predicate,
+		String search, int start, int end,
+		com.liferay.portal.kernel.search.Sort[] sorts)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		return _objectEntryLocalService.getValuesList(
+			groupId, companyId, dtoConverterContext, objectDefinitionId, predicate, search,
 			start, end, sorts);
 	}
 
