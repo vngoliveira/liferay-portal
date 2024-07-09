@@ -211,6 +211,11 @@ components:
                 content:
                     type: string
                     x-json-string: true
+                creator:
+                    $ref: "#/components/schemas/Creator"
+                    description:
+                        The person who created the workflow
+                    readOnly: true
                 dateCreated:
                     format: date-time
                     readOnly: true
@@ -243,7 +248,7 @@ components:
                     items:
                         $ref: "#/components/schemas/Transition"
                     readOnly: true
-                    type: array
+                    type: arrayw
                 version:
                     type: string
             type: object
