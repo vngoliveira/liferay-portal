@@ -99,7 +99,7 @@ export function getUserNotificationRoles(
 			.filter(({name}) => name !== 'Guest')
 			.map(({externalReferenceCode, name}) => {
 				const selectedRole = !!recipients.find(
-					({roleName}) => roleName === externalReferenceCode
+					({roleName}) => roleName === name
 				);
 
 				return {

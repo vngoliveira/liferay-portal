@@ -55,6 +55,8 @@ export function UserNotificationSettings({
 		);
 
 		setRolesList([roles]);
+
+		console.log('roles', roles)
 		setUserList([]);
 	};
 
@@ -108,7 +110,7 @@ export function UserNotificationSettings({
 
 			itemsGroup.children.forEach((child) => {
 				if (child.checked) {
-					newRecipients.push({[key]: child.value});
+					newRecipients.push({[key]: child.label});
 				}
 			});
 		}
