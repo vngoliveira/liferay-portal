@@ -9,10 +9,15 @@ import com.liferay.object.constants.ObjectPortletKeys;
 import com.liferay.object.model.ObjectDefinition;
 import com.liferay.object.service.ObjectDefinitionLocalService;
 import com.liferay.portal.kernel.json.JSONUtil;
+import com.liferay.portal.kernel.language.Language;
+import com.liferay.portal.kernel.model.WorkflowDefinitionLink;
 import com.liferay.portal.kernel.portlet.JSONPortletResponseUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCResourceCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
+import com.liferay.portal.kernel.service.WorkflowDefinitionLinkLocalService;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ParamUtil;
+import com.liferay.portal.kernel.util.WebKeys;
 
 import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
@@ -46,12 +51,39 @@ public class GetObjectDefinitionInfoMVCResourceCommand
 			return;
 		}
 
+		ThemeDisplay themeDisplay = (ThemeDisplay)resourceRequest.getAttribute(
+			WebKeys.THEME_DISPLAY);
+
+		WorkflowDefinitionLink workflowDefinitionLink =
+			_workflowDefinitionLinkLocalService.fetchWorkflowDefinitionLink(
+				themeDisplay.getCompanyId(), themeDisplay.getSiteGroupId(),
+				objectDefinition.getClassName(), 0, 0);
+
+		String workflowDefinitionLabel = _language.get(
+			themeDisplay.getLocale(), "no-workflow");
+
+		if (workflowDefinitionLink != null) {
+			workflowDefinitionLabel =
+				workflowDefinitionLink.getWorkflowDefinitionName();
+		}
+
 		JSONPortletResponseUtil.writeJSON(
 			resourceRequest, resourceResponse,
-			JSONUtil.put("tableName", objectDefinition.getDBTableName()));
+			JSONUtil.put(
+				"tableName", objectDefinition.getDBTableName()
+			).put(
+				"workflowDefinitionLabel", workflowDefinitionLabel
+			));
 	}
 
 	@Reference
+	private Language _language;
+
+	@Reference
 	private ObjectDefinitionLocalService _objectDefinitionLocalService;
+
+	@Reference
+	private WorkflowDefinitionLinkLocalService
+		_workflowDefinitionLinkLocalService;
 
 }
