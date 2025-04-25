@@ -14,10 +14,13 @@ import com.liferay.portal.kernel.model.WorkflowDefinitionLink;
 import com.liferay.portal.kernel.portlet.JSONPortletResponseUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCResourceCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
+import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.service.WorkflowDefinitionLinkLocalService;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.WebKeys;
+import com.liferay.portal.workflow.kaleo.model.KaleoDefinition;
+import com.liferay.portal.workflow.kaleo.service.KaleoDefinitionLocalService;
 
 import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
@@ -63,8 +66,13 @@ public class GetObjectDefinitionInfoMVCResourceCommand
 			themeDisplay.getLocale(), "no-workflow");
 
 		if (workflowDefinitionLink != null) {
-			workflowDefinitionLabel =
-				workflowDefinitionLink.getWorkflowDefinitionName();
+			KaleoDefinition kaleoDefinition =
+				_kaleoDefinitionLocalService.fetchKaleoDefinition(
+					workflowDefinitionLink.getWorkflowDefinitionName(),
+					ServiceContextThreadLocal.getServiceContext());
+
+			workflowDefinitionLabel = kaleoDefinition.getTitle(
+				themeDisplay.getLocale());
 		}
 
 		JSONPortletResponseUtil.writeJSON(
@@ -75,6 +83,9 @@ public class GetObjectDefinitionInfoMVCResourceCommand
 				"workflowDefinitionLabel", workflowDefinitionLabel
 			));
 	}
+
+	@Reference
+	private KaleoDefinitionLocalService _kaleoDefinitionLocalService;
 
 	@Reference
 	private Language _language;
