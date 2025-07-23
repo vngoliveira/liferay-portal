@@ -592,6 +592,42 @@ public class ObjectEntryResourceImpl
 			_objectDefinition, null, version);
 	}
 
+	public void postByExternalReferenceCodeSubscribe(
+			String externalReferenceCode)
+		throws Exception {
+
+		if (!FeatureFlagManagerUtil.isEnabled("LPD-42577")) {
+			throw new UnsupportedOperationException();
+		}
+
+		DefaultObjectEntryManager defaultObjectEntryManager =
+			DefaultObjectEntryManagerProvider.provide(
+				_objectEntryManagerRegistry.getObjectEntryManager(
+					_objectDefinition.getStorageType()));
+
+		defaultObjectEntryManager.subscribeObjectEntryByExternalReferenceCode(
+			_getDTOConverterContext(null), externalReferenceCode,
+			_objectDefinition, null);
+	}
+
+	public void postByExternalReferenceCodeUnsubscribe(
+			String externalReferenceCode)
+		throws Exception {
+
+		if (!FeatureFlagManagerUtil.isEnabled("LPD-42577")) {
+			throw new UnsupportedOperationException();
+		}
+
+		DefaultObjectEntryManager defaultObjectEntryManager =
+			DefaultObjectEntryManagerProvider.provide(
+				_objectEntryManagerRegistry.getObjectEntryManager(
+					_objectDefinition.getStorageType()));
+
+		defaultObjectEntryManager.unsubscribeObjectEntryByExternalReferenceCode(
+			_getDTOConverterContext(null), externalReferenceCode,
+			_objectDefinition, null);
+	}
+
 	@Override
 	public Response postObjectEntriesPageExportBatch(
 			String search, Filter filter, Sort[] sorts, String callbackURL,
@@ -676,6 +712,40 @@ public class ObjectEntryResourceImpl
 	}
 
 	@Override
+	public void postObjectEntrySubscribe(Long objectEntryId) throws Exception {
+		if (!FeatureFlagManagerUtil.isEnabled("LPD-42577")) {
+			throw new UnsupportedOperationException();
+		}
+
+		DefaultObjectEntryManager defaultObjectEntryManager =
+			DefaultObjectEntryManagerProvider.provide(
+				_objectEntryManagerRegistry.getObjectEntryManager(
+					_objectDefinition.getStorageType()));
+
+		defaultObjectEntryManager.subscribeObjectEntry(
+			_getDTOConverterContext(objectEntryId), _objectDefinition,
+			objectEntryId);
+	}
+
+	@Override
+	public void postObjectEntryUnsubscribe(Long objectEntryId)
+		throws Exception {
+
+		if (!FeatureFlagManagerUtil.isEnabled("LPD-42577")) {
+			throw new UnsupportedOperationException();
+		}
+
+		DefaultObjectEntryManager defaultObjectEntryManager =
+			DefaultObjectEntryManagerProvider.provide(
+				_objectEntryManagerRegistry.getObjectEntryManager(
+					_objectDefinition.getStorageType()));
+
+		defaultObjectEntryManager.unsubscribeObjectEntry(
+			_getDTOConverterContext(objectEntryId), _objectDefinition,
+			objectEntryId);
+	}
+
+	@Override
 	public ObjectEntry postScopeScopeKey(
 			String scopeKey, ObjectEntry objectEntry)
 		throws Exception {
@@ -725,6 +795,44 @@ public class ObjectEntryResourceImpl
 		return defaultObjectEntryManager.expireObjectEntryByVersion(
 			_getDTOConverterContext(null), externalReferenceCode,
 			_objectDefinition, scopeKey, version);
+	}
+
+	@Override
+	public void postScopeScopeKeyByExternalReferenceCodeSubscribe(
+			String scopeKey, String externalReferenceCode)
+		throws Exception {
+
+		if (!FeatureFlagManagerUtil.isEnabled("LPD-42577")) {
+			throw new UnsupportedOperationException();
+		}
+
+		DefaultObjectEntryManager defaultObjectEntryManager =
+			DefaultObjectEntryManagerProvider.provide(
+				_objectEntryManagerRegistry.getObjectEntryManager(
+					_objectDefinition.getStorageType()));
+
+		defaultObjectEntryManager.subscribeObjectEntryByExternalReferenceCode(
+			_getDTOConverterContext(null), externalReferenceCode,
+			_objectDefinition, scopeKey);
+	}
+
+	@Override
+	public void postScopeScopeKeyByExternalReferenceCodeUnsubscribe(
+			String scopeKey, String externalReferenceCode)
+		throws Exception {
+
+		if (!FeatureFlagManagerUtil.isEnabled("LPD-42577")) {
+			throw new UnsupportedOperationException();
+		}
+
+		DefaultObjectEntryManager defaultObjectEntryManager =
+			DefaultObjectEntryManagerProvider.provide(
+				_objectEntryManagerRegistry.getObjectEntryManager(
+					_objectDefinition.getStorageType()));
+
+		defaultObjectEntryManager.unsubscribeObjectEntryByExternalReferenceCode(
+			_getDTOConverterContext(null), externalReferenceCode,
+			_objectDefinition, scopeKey);
 	}
 
 	@Override
