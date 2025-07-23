@@ -198,6 +198,7 @@ import com.liferay.portal.vulcan.fields.NestedFieldsContextThreadLocal;
 import com.liferay.portal.vulcan.pagination.Page;
 import com.liferay.portal.vulcan.permission.Permission;
 import com.liferay.portal.vulcan.util.LocalizedMapUtil;
+import com.liferay.subscription.service.SubscriptionLocalService;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -5924,6 +5925,180 @@ public class DefaultObjectEntryManagerImplTest
 		_assertObjectEntriesSize1(_objectDefinition3, "Delta", 1);
 	}
 
+	@FeatureFlag("LPD-42577")
+	@Test
+	public void testSubscribeAndUnsubscribeObjectEntry() throws Exception {
+		ObjectDefinition objectDefinition = _createObjectDefinition(
+			Collections.singletonList(
+				new TextObjectFieldBuilder(
+				).labelMap(
+					LocalizedMapUtil.getLocalizedMap(
+						RandomTestUtil.randomString())
+				).name(
+					"textObjectFieldName"
+				).build()));
+
+		ObjectEntry objectEntry = _defaultObjectEntryManager.addObjectEntry(
+			_simpleDTOConverterContext, objectDefinition,
+			new ObjectEntry() {
+				{
+					properties = HashMapBuilder.<String, Object>put(
+						"textObjectFieldName", RandomTestUtil.randomString()
+					).build();
+				}
+			},
+			ObjectDefinitionConstants.SCOPE_COMPANY);
+
+		_defaultObjectEntryManager.subscribeObjectEntryByExternalReferenceCode(
+			dtoConverterContext, objectEntry.getExternalReferenceCode(),
+			objectDefinition, objectEntry.getScopeKey());
+
+		Assert.assertTrue(
+			_subscriptionLocalService.isSubscribed(
+				objectDefinition.getCompanyId(), adminUser.getUserId(),
+				objectDefinition.getClassName(), objectEntry.getId()));
+
+		_user = _addUser();
+
+		DTOConverterContext dtoConverterContext =
+			new DefaultDTOConverterContext(
+				false, Collections.emptyMap(), dtoConverterRegistry, null,
+				LocaleUtil.getDefault(), null, _user);
+
+		Role role = _addRoleUser(
+			new String[] {ActionKeys.VIEW}, objectDefinition, _user);
+
+		AssertUtils.assertFailure(
+			PrincipalException.MustHavePermission.class,
+			StringBundler.concat(
+				"User ", _user.getUserId(),
+				" must have SUBSCRIBE permission for ",
+				objectDefinition.getClassName(), StringPool.SPACE,
+				objectEntry.getId()),
+			() ->
+				_defaultObjectEntryManager.
+					subscribeObjectEntryByExternalReferenceCode(
+						dtoConverterContext,
+						objectEntry.getExternalReferenceCode(),
+						objectDefinition, objectEntry.getScopeKey()));
+
+		_resourcePermissionLocalService.addResourcePermission(
+			companyId, objectDefinition.getClassName(),
+			ResourceConstants.SCOPE_COMPANY, String.valueOf(companyId),
+			role.getRoleId(), ActionKeys.SUBSCRIBE);
+
+		_defaultObjectEntryManager.subscribeObjectEntryByExternalReferenceCode(
+			dtoConverterContext, objectEntry.getExternalReferenceCode(),
+			objectDefinition, objectEntry.getScopeKey());
+
+		Assert.assertTrue(
+			_subscriptionLocalService.isSubscribed(
+				objectDefinition.getCompanyId(), _user.getUserId(),
+				objectDefinition.getClassName(), objectEntry.getId()));
+
+		_objectEntryLocalService.deleteObjectEntry(objectEntry.getId());
+
+		Assert.assertFalse(
+			_subscriptionLocalService.isSubscribed(
+				objectDefinition.getCompanyId(), adminUser.getUserId(),
+				objectDefinition.getClassName(), objectEntry.getId()));
+
+		Assert.assertFalse(
+			_subscriptionLocalService.isSubscribed(
+				objectDefinition.getCompanyId(), _user.getUserId(),
+				objectDefinition.getClassName(), objectEntry.getId()));
+
+		PrincipalThreadLocal.setName(adminUser.getUserId());
+		PermissionThreadLocal.setPermissionChecker(
+			PermissionCheckerFactoryUtil.create(adminUser));
+
+		ObjectDefinition objectDefinitionA = _createObjectDefinition(
+			Collections.singletonList(
+				new TextObjectFieldBuilder(
+				).labelMap(
+					LocalizedMapUtil.getLocalizedMap(
+						RandomTestUtil.randomString())
+				).name(
+					"textObjectFieldName"
+				).build()));
+
+		ObjectDefinition objectDefinitionAA = _createObjectDefinition(
+			Collections.singletonList(
+				new TextObjectFieldBuilder(
+				).labelMap(
+					LocalizedMapUtil.getLocalizedMap(
+						RandomTestUtil.randomString())
+				).name(
+					"a" + RandomTestUtil.randomString()
+				).build()));
+
+		ObjectRelationship objectRelationshipA_AA =
+			_objectRelationshipLocalService.addObjectRelationship(
+				null, adminUser.getUserId(),
+				objectDefinitionA.getObjectDefinitionId(),
+				objectDefinitionAA.getObjectDefinitionId(), 0,
+				ObjectRelationshipConstants.DELETION_TYPE_CASCADE, true,
+				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
+				StringUtil.randomId(), false,
+				ObjectRelationshipConstants.TYPE_ONE_TO_MANY, null);
+
+		ObjectEntry rootObjectEntry = _defaultObjectEntryManager.addObjectEntry(
+			_simpleDTOConverterContext, objectDefinitionA,
+			new ObjectEntry() {
+				{
+					properties = HashMapBuilder.<String, Object>put(
+						"textObjectFieldName", RandomTestUtil.randomString()
+					).build();
+				}
+			},
+			ObjectDefinitionConstants.SCOPE_COMPANY);
+
+		_defaultObjectEntryManager.subscribeObjectEntryByExternalReferenceCode(
+			_simpleDTOConverterContext,
+			rootObjectEntry.getExternalReferenceCode(), objectDefinitionA,
+			rootObjectEntry.getScopeKey());
+
+		Assert.assertTrue(
+			_subscriptionLocalService.isSubscribed(
+				objectDefinitionA.getCompanyId(), adminUser.getUserId(),
+				objectDefinitionA.getClassName(), rootObjectEntry.getId()));
+
+		_defaultObjectEntryManager.
+			unsubscribeObjectEntryByExternalReferenceCode(
+				_simpleDTOConverterContext,
+				rootObjectEntry.getExternalReferenceCode(), objectDefinitionA,
+				rootObjectEntry.getScopeKey());
+
+		Assert.assertFalse(
+			_subscriptionLocalService.isSubscribed(
+				objectDefinitionA.getCompanyId(), adminUser.getUserId(),
+				objectDefinitionA.getClassName(), rootObjectEntry.getId()));
+
+		ObjectField objectField = _objectFieldLocalService.getObjectField(
+			objectRelationshipA_AA.getObjectFieldId2());
+
+		ObjectEntry childObjectEntry =
+			_defaultObjectEntryManager.addObjectEntry(
+				_simpleDTOConverterContext, objectDefinitionAA,
+				new ObjectEntry() {
+					{
+						properties = HashMapBuilder.<String, Object>put(
+							objectField.getName(), rootObjectEntry.getId()
+						).build();
+					}
+				},
+				ObjectDefinitionConstants.SCOPE_COMPANY);
+
+		AssertUtils.assertFailure(
+			UnsupportedOperationException.class, null,
+			() ->
+				_defaultObjectEntryManager.
+					subscribeObjectEntryByExternalReferenceCode(
+						_simpleDTOConverterContext,
+						childObjectEntry.getExternalReferenceCode(),
+						objectDefinitionAA, childObjectEntry.getScopeKey()));
+	}
+
 	@Test
 	public void testToObjectEntry() throws Exception {
 
@@ -8475,6 +8650,9 @@ public class DefaultObjectEntryManagerImplTest
 
 	@Inject
 	private SearchRequestBuilderFactory _searchRequestBuilderFactory;
+
+	@Inject
+	private SubscriptionLocalService _subscriptionLocalService;
 
 	private Tree _tree;
 
