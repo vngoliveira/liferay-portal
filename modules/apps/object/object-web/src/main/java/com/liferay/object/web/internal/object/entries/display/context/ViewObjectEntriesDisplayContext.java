@@ -155,6 +155,20 @@ public class ViewObjectEntriesDisplayContext {
 				LanguageUtil.get(_objectRequestHelper.getRequest(), "delete"),
 				"delete", "delete", null),
 			new FDSActionDropdownItem(
+				getByExternalReferenceCodePath() +
+					"/{externalReferenceCode}/unsubscribe",
+				"bell-off", "unsubscribe",
+				LanguageUtil.get(
+					_objectRequestHelper.getRequest(), "unsubscribe"),
+				"post", "unsubscribe", "async"),
+			new FDSActionDropdownItem(
+				getByExternalReferenceCodePath() +
+					"/{externalReferenceCode}/subscribe",
+				"bell-on", "subscribe",
+				LanguageUtil.get(
+					_objectRequestHelper.getRequest(), "subscribe"),
+				"post", "subscribe", "async"),
+			new FDSActionDropdownItem(
 				_getPermissionsURL(), "password-policies", "permissions",
 				LanguageUtil.get(
 					_objectRequestHelper.getRequest(), "permissions"),
