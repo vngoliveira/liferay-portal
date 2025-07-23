@@ -442,6 +442,41 @@ public class ObjectEntryServiceImpl extends ObjectEntryServiceBaseImpl {
 	}
 
 	@Override
+	public void subscribeObjectEntry(
+			long groupId, long userId, long objectEntryId,
+			boolean rootDescendant)
+		throws PortalException {
+
+		ObjectEntry objectEntry = objectEntryLocalService.getObjectEntry(
+			objectEntryId);
+
+		checkModelResourcePermission(
+			objectEntry.getObjectDefinitionId(), objectEntry.getObjectEntryId(),
+			ActionKeys.SUBSCRIBE);
+
+		objectEntryLocalService.subscribeObjectEntry(
+			groupId, userId, objectEntry.getModelClassName(), objectEntryId,
+			rootDescendant);
+	}
+
+	@Override
+	public void unsubscribeObjectEntry(
+			long userId, long objectEntryId, boolean rootDescendant)
+		throws PortalException {
+
+		ObjectEntry objectEntry = objectEntryLocalService.getObjectEntry(
+			objectEntryId);
+
+		checkModelResourcePermission(
+			objectEntry.getObjectDefinitionId(), objectEntry.getObjectEntryId(),
+			ActionKeys.SUBSCRIBE);
+
+		objectEntryLocalService.unsubscribeObjectEntry(
+			userId, objectEntry.getModelClassName(), objectEntryId,
+			rootDescendant);
+	}
+
+	@Override
 	public ObjectEntry updateObjectEntry(
 			long objectEntryId, Map<String, Serializable> values,
 			ServiceContext serviceContext)

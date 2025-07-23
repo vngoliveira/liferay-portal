@@ -249,6 +249,7 @@ import com.liferay.portal.util.PropsValues;
 import com.liferay.portal.vulcan.dto.converter.DTOConverterRegistry;
 import com.liferay.portal.vulcan.util.LocalizedMapUtil;
 import com.liferay.sharing.service.SharingEntryLocalService;
+import com.liferay.subscription.service.SubscriptionLocalService;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -713,6 +714,12 @@ public class ObjectEntryLocalServiceImpl
 				_classNameLocalService.getClassNameId(
 					objectDefinition.getClassName()),
 				objectEntry.getObjectEntryId());
+
+			if (FeatureFlagManagerUtil.isEnabled("LPD-42577")) {
+				_subscriptionLocalService.deleteSubscriptions(
+					objectEntry.getCompanyId(), objectEntry.getModelClassName(),
+					objectEntry.getObjectEntryId());
+			}
 
 			_deleteFromLocalizationTable(
 				objectDefinition, objectEntry.getObjectEntryId());
@@ -1799,6 +1806,34 @@ public class ObjectEntryLocalServiceImpl
 						document.getLong(Field.ENTRY_CLASS_PK));
 				}),
 			searchResponse.getTotalHits());
+	}
+
+	@Override
+	public void subscribeObjectEntry(
+			long groupId, long userId, String className, long objectEntryId,
+			boolean rootDescendant)
+		throws PortalException {
+
+		if (rootDescendant) {
+			throw new UnsupportedOperationException();
+		}
+
+		_subscriptionLocalService.addSubscription(
+			userId, groupId, className, objectEntryId);
+	}
+
+	@Override
+	public void unsubscribeObjectEntry(
+			long userId, String className, long objectEntryId,
+			boolean rootDescendant)
+		throws PortalException {
+
+		if (rootDescendant) {
+			throw new UnsupportedOperationException();
+		}
+
+		_subscriptionLocalService.deleteSubscription(
+			userId, className, objectEntryId);
 	}
 
 	@Override
@@ -7027,6 +7062,9 @@ public class ObjectEntryLocalServiceImpl
 
 	@Reference
 	private Sorts _sorts;
+
+	@Reference
+	private SubscriptionLocalService _subscriptionLocalService;
 
 	@Reference
 	private SystemObjectDefinitionManagerRegistry
