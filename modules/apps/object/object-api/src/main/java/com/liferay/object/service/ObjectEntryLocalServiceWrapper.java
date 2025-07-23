@@ -790,6 +790,26 @@ public class ObjectEntryLocalServiceWrapper
 	}
 
 	@Override
+	public void subscribeObjectEntry(
+			long groupId, long userId, String className, long objectEntryId,
+			boolean rootDescendant)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		_objectEntryLocalService.subscribeObjectEntry(
+			groupId, userId, className, objectEntryId, rootDescendant);
+	}
+
+	@Override
+	public void unsubscribeObjectEntry(
+			long userId, String className, long objectEntryId,
+			boolean rootDescendant)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		_objectEntryLocalService.unsubscribeObjectEntry(
+			userId, className, objectEntryId, rootDescendant);
+	}
+
+	@Override
 	public void updateAsset(
 			long userId, com.liferay.object.model.ObjectEntry objectEntry,
 			long[] assetCategoryIds, String[] assetTagNames,

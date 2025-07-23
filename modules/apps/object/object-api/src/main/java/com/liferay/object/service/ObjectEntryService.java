@@ -160,6 +160,15 @@ public interface ObjectEntryService extends BaseService {
 			ServiceContext serviceContext)
 		throws PortalException;
 
+	public void subscribeObjectEntry(
+			long groupId, long userId, long objectEntryId,
+			boolean rootDescendant)
+		throws PortalException;
+
+	public void unsubscribeObjectEntry(
+			long userId, long objectEntryId, boolean rootDescendant)
+		throws PortalException;
+
 	public ObjectEntry updateObjectEntry(
 			long objectEntryId, Map<String, Serializable> values,
 			ServiceContext serviceContext)

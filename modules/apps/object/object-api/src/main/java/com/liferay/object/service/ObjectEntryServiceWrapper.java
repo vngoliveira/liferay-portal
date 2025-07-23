@@ -245,6 +245,25 @@ public class ObjectEntryServiceWrapper
 	}
 
 	@Override
+	public void subscribeObjectEntry(
+			long groupId, long userId, long objectEntryId,
+			boolean rootDescendant)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		_objectEntryService.subscribeObjectEntry(
+			groupId, userId, objectEntryId, rootDescendant);
+	}
+
+	@Override
+	public void unsubscribeObjectEntry(
+			long userId, long objectEntryId, boolean rootDescendant)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		_objectEntryService.unsubscribeObjectEntry(
+			userId, objectEntryId, rootDescendant);
+	}
+
+	@Override
 	public com.liferay.object.model.ObjectEntry updateObjectEntry(
 			long objectEntryId,
 			java.util.Map<String, java.io.Serializable> values,
