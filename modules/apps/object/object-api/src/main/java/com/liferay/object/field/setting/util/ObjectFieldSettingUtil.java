@@ -21,11 +21,13 @@ import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.TimeZoneUtil;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.TimeZone;
 
 /**
  * @author Carolina Barbosa
@@ -107,12 +109,12 @@ public class ObjectFieldSettingUtil {
 	public static String getTimeZoneId(
 		List<ObjectFieldSetting> objectFieldSettings, User user) {
 
-		if ((user == null) || ListUtil.isEmpty(objectFieldSettings) ||
+		if ((user == null) || (!ListUtil.isEmpty(objectFieldSettings) &&
 			!StringUtil.equals(
 				getValue(
 					ObjectFieldSettingConstants.NAME_TIME_STORAGE,
 					objectFieldSettings),
-				ObjectFieldSettingConstants.VALUE_CONVERT_TO_UTC)) {
+				ObjectFieldSettingConstants.VALUE_CONVERT_TO_UTC))) {
 
 			return null;
 		}
