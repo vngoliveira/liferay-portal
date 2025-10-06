@@ -5,17 +5,24 @@
 
 import {expect, mergeTests} from '@playwright/test';
 
+import {
+	ObjectValidationRuleAPI,
+} from '@liferay/object-admin-rest-client-js';
+
 import {applicationsMenuPageTest} from '../../../fixtures/applicationsMenuPageTest';
 import {dataApiHelpersTest} from '../../../fixtures/dataApiHelpersTest';
 import {formsPagesTest} from '../../../fixtures/formsPagesTest';
 import {loginTest} from '../../../fixtures/loginTest';
 import {getRandomInt} from '../../../utils/getRandomInt';
 import {deleteItems} from './utils/deleteItems';
+import {getObjectERC} from '../../setup/page-management-site/main/utils/getObjectERC';
+import {objectPagesTest} from '../../../fixtures/objectPagesTest';
 
 export const test = mergeTests(
 	applicationsMenuPageTest,
 	dataApiHelpersTest,
 	formsPagesTest,
+	objectPagesTest,
 	loginTest()
 );
 
@@ -28,6 +35,93 @@ test.afterEach(async ({formsPage}) => {
 test.describe('FormView when form storage type is object', () => {
 	test.beforeEach(({page}) => {
 		page.setViewportSize({height: 1080, width: 1920});
+	});
+
+	test('make sure', async ({
+		apiHelpers,
+		formBuilderPage,
+		formBuilderSidePanelPage,
+		formSettingsModalPage,
+		page,
+		objectValidationsPage,
+	}) => {
+		const objectDefinition =
+			await apiHelpers.objectAdmin.postRandomObjectDefinition({
+				status: {code: 0},
+			});
+
+		apiHelpers.data.push({
+			id: objectDefinition.id,
+			type: 'objectDefinition',
+		});
+
+		const objectValidationRuleAPIClient =
+				await apiHelpers.buildRestClient(ObjectValidationRuleAPI);
+
+
+		await objectValidationRuleAPIClient.postObjectDefinitionByExternalReferenceCodeObjectValidationRule(
+			objectDefinition.externalReferenceCode,
+			{
+				active: true,
+				engine: 'ddm',
+				errorLabel: {
+					en_US: 'Error',
+				},
+				name: {
+					en_US: 'Validation',
+				},
+				objectValidationRuleSettings: [],
+				script: "contains(textField, \"b\")",
+				system: false,
+			}
+		);
+
+		objectValidationsPage.goto(objectDefinition.label['en_US']);
+
+		await formBuilderPage.goToNew();
+
+		await expect(formBuilderPage.newFormHeading).toBeVisible();
+
+		const formTitle = 'Form' + getRandomInt();
+
+		await formBuilderPage.fillFormTitle(formTitle);
+
+		await formBuilderPage.formSettingsButton.click();
+
+		await formSettingsModalPage.selectStorageType('Object');
+
+		await formSettingsModalPage.selectObject(
+			objectDefinition.label['en_US']
+		);
+
+		await formSettingsModalPage.clickDoneButton();
+
+		await formBuilderSidePanelPage.addFieldByDoubleClick('Text');
+
+		await formBuilderSidePanelPage.clickAdvancedTab();
+
+		await formBuilderSidePanelPage.selectObjectField('textField');
+
+		await expect(formBuilderSidePanelPage.objectFieldSelect).toBeVisible();
+
+		await apiHelpers.dynamicDataMapping.waitForDDMEvaluate(page);
+
+		await formBuilderPage.clickSaveButton();
+
+		await formBuilderPage.clickPublishFormButton();
+
+		const formSubmissionURL = await formBuilderPage.getFormSubmissionURL();
+
+		await page.goto(formSubmissionURL, {waitUntil: 'networkidle'});
+
+		await page.getByLabel('Text').fill("a");
+
+	    await page.getByRole('button', {name: 'Save'}).click();
+
+		await expect(
+			page.getByText("Error")
+		).toBeVisible();
+
 	});
 
 	test('make sure the button submit label is Submit to workflow when the object definition has a linked workflow and Save when it does not', async ({

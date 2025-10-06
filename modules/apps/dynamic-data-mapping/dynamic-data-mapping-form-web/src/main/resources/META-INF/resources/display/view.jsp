@@ -141,6 +141,15 @@ boolean limitToOneSubmissionPerUser = DDMFormInstanceSubmissionLimitStatusUtil.i
 						<liferay-ui:error exception="<%= DDMFormRenderingException.class %>" message="unable-to-render-the-selected-form" />
 						<liferay-ui:error exception="<%= DDMFormValuesValidationException.class %>" message="field-validation-failed" />
 
+						<liferay-ui:error exception="<%= ObjectValidationRuleEngineException.class %>">
+
+							<%
+							ObjectValidationRuleEngineException objectValidationRuleEngineException = (ObjectValidationRuleEngineException)errorException;
+							%>
+
+							<%= objectValidationRuleEngineException.getMessage() %>
+						</liferay-ui:error>
+
 						<liferay-ui:error exception="<%= DDMFormValuesValidationException.MustSetValidValue.class %>">
 
 							<%
