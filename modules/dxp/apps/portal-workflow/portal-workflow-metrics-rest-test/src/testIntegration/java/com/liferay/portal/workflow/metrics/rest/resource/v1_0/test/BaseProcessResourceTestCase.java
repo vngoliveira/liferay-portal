@@ -20,6 +20,7 @@ import com.liferay.oauth2.provider.scope.ScopeChecker;
 import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.petra.reflect.ReflectionUtil;
 import com.liferay.petra.string.StringBundler;
+import com.liferay.portal.kernel.concurrent.test.TestUtil;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONDeserializer;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
@@ -699,6 +700,8 @@ public abstract class BaseProcessResourceTestCase {
 
 		testBatchEngineDeleteImportTask_deleteProcess(
 			200, null, process1.getId());
+
+		Thread.sleep(TestUtil.KEEPALIVE_WAIT);
 
 		assertHttpResponseStatusCode(
 			404, processResource.getProcessHttpResponse(process1.getId()));
