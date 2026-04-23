@@ -22,7 +22,7 @@ import type {
 	LocalizedValue,
 } from 'dynamic-data-mapping-form-field-type';
 
-async function fetchOptions<T>(url: string) {
+export async function fetchOptions<T>(url: string) {
 	const response = await fetch(url, {
 		headers: {
 			'Accept': 'application/json',
