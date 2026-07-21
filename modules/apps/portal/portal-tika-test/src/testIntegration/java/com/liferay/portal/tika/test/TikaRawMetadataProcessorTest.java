@@ -38,7 +38,7 @@ public class TikaRawMetadataProcessorTest {
 		new LiferayIntegrationTestRule();
 
 	@Test
-	public void testGetRawMetadataMapWithXMatlab() throws Exception {
+	public void testGetRawMetadataMapWithTextPlain() throws Exception {
 		Map<String, DDMFormValues> rawMetadataMap =
 			_rawMetadataProcessor.getRawMetadataMap(
 				ContentTypes.APPLICATION_JAVASCRIPT,
