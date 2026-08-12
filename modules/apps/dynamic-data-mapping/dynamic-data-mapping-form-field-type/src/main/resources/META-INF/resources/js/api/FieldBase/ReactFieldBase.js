@@ -482,6 +482,7 @@ export default function FieldBase({
 									...field,
 									disabled: false,
 									hidden: false,
+									hiddenByTranslationFilter: false,
 									visible: true,
 								};
 							},
