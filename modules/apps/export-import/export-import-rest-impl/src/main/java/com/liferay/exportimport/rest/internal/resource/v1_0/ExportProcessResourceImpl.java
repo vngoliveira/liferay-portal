@@ -41,12 +41,12 @@ import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.search.Sort;
 import com.liferay.portal.kernel.service.PortletLocalService;
 import com.liferay.portal.kernel.service.UserLocalService;
+import com.liferay.portal.kernel.servlet.ContentDispositionUtil;
 import com.liferay.portal.kernel.util.DateRange;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.StringUtil;
-import com.liferay.portal.kernel.util.URLCodec;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.vulcan.pagination.Page;
 import com.liferay.portal.vulcan.pagination.Pagination;
@@ -54,6 +54,7 @@ import com.liferay.staging.StagingGroupHelper;
 
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 
 import java.io.Serializable;
@@ -153,8 +154,9 @@ public class ExportProcessResourceImpl extends BaseExportProcessResourceImpl {
 		return Response.ok(
 			fileEntry.getContentStream()
 		).header(
-			"Content-Disposition",
-			getContentDispositionHeaderValue(fileEntry.getTitle())
+			HttpHeaders.CONTENT_DISPOSITION,
+			ContentDispositionUtil.getContentDispositionHeaderValue(
+				fileEntry.getTitle())
 		).build();
 	}
 
@@ -314,11 +316,6 @@ public class ExportProcessResourceImpl extends BaseExportProcessResourceImpl {
 		return _postPortletExportProcess(
 			exportProcessRequest, _getSiteGroup(siteExternalReferenceCode),
 			GetterUtil.getLong(plid), portletId);
-	}
-
-	protected static String getContentDispositionHeaderValue(String fileName) {
-		return "attachment; filename*=UTF-8''" +
-			URLCodec.encodeURL(fileName, true);
 	}
 
 	private Group _getAssetLibraryGroup(String externalReferenceCode) {
