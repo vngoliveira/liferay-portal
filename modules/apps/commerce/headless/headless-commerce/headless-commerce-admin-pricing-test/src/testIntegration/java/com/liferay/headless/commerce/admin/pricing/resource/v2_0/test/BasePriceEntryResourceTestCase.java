@@ -1969,6 +1969,61 @@ public abstract class BasePriceEntryResourceTestCase {
 	}
 
 	@Test
+	public void testPutPriceEntryByExternalReferenceCode() throws Exception {
+		PriceEntry postPriceEntry =
+			testPutPriceEntryByExternalReferenceCode_addPriceEntry();
+
+		PriceEntry randomPriceEntry = randomPriceEntry();
+
+		PriceEntry putPriceEntry =
+			priceEntryResource.putPriceEntryByExternalReferenceCode(
+				postPriceEntry.getExternalReferenceCode(), randomPriceEntry);
+
+		assertEquals(randomPriceEntry, putPriceEntry);
+		assertValid(putPriceEntry);
+
+		PriceEntry getPriceEntry =
+			priceEntryResource.getPriceEntryByExternalReferenceCode(
+				putPriceEntry.getExternalReferenceCode());
+
+		assertEquals(randomPriceEntry, getPriceEntry);
+		assertValid(getPriceEntry);
+
+		PriceEntry newPriceEntry =
+			testPutPriceEntryByExternalReferenceCode_createPriceEntry();
+
+		putPriceEntry = priceEntryResource.putPriceEntryByExternalReferenceCode(
+			newPriceEntry.getExternalReferenceCode(), newPriceEntry);
+
+		assertEquals(newPriceEntry, putPriceEntry);
+		assertValid(putPriceEntry);
+
+		getPriceEntry = priceEntryResource.getPriceEntryByExternalReferenceCode(
+			putPriceEntry.getExternalReferenceCode());
+
+		assertEquals(newPriceEntry, getPriceEntry);
+
+		Assert.assertEquals(
+			newPriceEntry.getExternalReferenceCode(),
+			putPriceEntry.getExternalReferenceCode());
+	}
+
+	protected PriceEntry
+			testPutPriceEntryByExternalReferenceCode_addPriceEntry()
+		throws Exception {
+
+		throw new UnsupportedOperationException(
+			"This method needs to be implemented");
+	}
+
+	protected PriceEntry
+			testPutPriceEntryByExternalReferenceCode_createPriceEntry()
+		throws Exception {
+
+		return randomPriceEntry();
+	}
+
+	@Test
 	public void testBatchEngineDeleteImportTask() throws Exception {
 		PriceEntry priceEntry1 =
 			testBatchEngineDeleteImportTask_addPriceEntry();
@@ -3703,4 +3758,4 @@ public abstract class BasePriceEntryResourceTestCase {
 		_vulcanCRUDItemDelegateBuilderRegistry;
 
 }
-// LIFERAY-REST-BUILDER-HASH:1627566968
+// LIFERAY-REST-BUILDER-HASH:584893928
