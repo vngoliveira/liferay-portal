@@ -8370,6 +8370,15 @@ public class ObjectEntryLocalServiceImpl
 			for (Map.Entry<String, Serializable> entry :
 					localizedValues.entrySet()) {
 
+				if ((existingValues == null) &&
+					!_language.isAvailableLocale(groupId, entry.getKey())) {
+
+					_handle(
+						new ObjectEntryValuesException.InvalidLanguageId(
+							entry.getKey(), objectField.getName()),
+						validationErrors);
+				}
+
 				Serializable value = entry.getValue();
 
 				Serializable processedValue =
