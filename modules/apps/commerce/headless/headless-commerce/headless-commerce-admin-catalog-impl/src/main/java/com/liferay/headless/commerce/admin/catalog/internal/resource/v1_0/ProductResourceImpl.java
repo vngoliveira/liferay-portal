@@ -109,6 +109,8 @@ import com.liferay.petra.string.StringPool;
 import com.liferay.portal.configuration.module.configuration.ConfigurationProvider;
 import com.liferay.portal.kernel.change.tracking.CTAware;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.search.Document;
 import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.Sort;
@@ -142,6 +144,7 @@ import com.liferay.portal.vulcan.pagination.Pagination;
 import com.liferay.portal.vulcan.util.SearchUtil;
 import com.liferay.upload.UniqueFileNameProvider;
 
+import jakarta.ws.rs.NotSupportedException;
 import jakarta.ws.rs.core.MultivaluedMap;
 
 import java.io.Serializable;
@@ -176,8 +179,48 @@ public class ProductResourceImpl extends BaseProductResourceImpl {
 			Collection<Product> products, Map<String, Serializable> parameters)
 		throws Exception {
 
-		for (Product product : products) {
-			deleteProduct(product.getProductId());
+		UnsafeFunction<Product, Product, Exception> unsafeFunction =
+			product -> {
+				if (product.getProductId() != null) {
+					try {
+						deleteProduct(product.getProductId());
+
+						return product;
+					}
+					catch (Exception exception) {
+						if (_log.isDebugEnabled()) {
+							_log.debug(exception);
+						}
+
+						if (product.getExternalReferenceCode() != null) {
+							deleteProductByExternalReferenceCode(
+								product.getExternalReferenceCode());
+
+							return product;
+						}
+					}
+				}
+				else if (product.getExternalReferenceCode() != null) {
+					deleteProductByExternalReferenceCode(
+						product.getExternalReferenceCode());
+
+					return product;
+				}
+
+				throw new UnsupportedOperationException(
+					"Unable to delete by external reference code or ID");
+			};
+
+		if (contextBatchUnsafeBiConsumer != null) {
+			contextBatchUnsafeBiConsumer.accept(products, unsafeFunction);
+		}
+		else if (contextBatchUnsafeConsumer != null) {
+			contextBatchUnsafeConsumer.accept(products, unsafeFunction::apply);
+		}
+		else {
+			for (Product product : products) {
+				unsafeFunction.apply(product);
+			}
 		}
 	}
 
@@ -458,8 +501,38 @@ public class ProductResourceImpl extends BaseProductResourceImpl {
 			Collection<Product> products, Map<String, Serializable> parameters)
 		throws Exception {
 
-		for (Product product : products) {
-			patchProduct(product.getProductId(), product);
+		UnsafeFunction<Product, Product, Exception> unsafeFunction = null;
+
+		String updateStrategy = (String)parameters.getOrDefault(
+			"updateStrategy", "UPDATE");
+
+		if (StringUtil.equalsIgnoreCase(updateStrategy, "PARTIAL_UPDATE")) {
+			unsafeFunction = product -> {
+				if (product.getProductId() != null) {
+					return patchProduct(product.getProductId(), product);
+				}
+
+				return patchProductByExternalReferenceCode(
+					product.getExternalReferenceCode(), product);
+			};
+		}
+
+		if (unsafeFunction == null) {
+			throw new NotSupportedException(
+				"Update strategy \"" + updateStrategy +
+					"\" is not supported for Product");
+		}
+
+		if (contextBatchUnsafeBiConsumer != null) {
+			contextBatchUnsafeBiConsumer.accept(products, unsafeFunction);
+		}
+		else if (contextBatchUnsafeConsumer != null) {
+			contextBatchUnsafeConsumer.accept(products, unsafeFunction::apply);
+		}
+		else {
+			for (Product product : products) {
+				unsafeFunction.apply(product);
+			}
 		}
 	}
 
@@ -1702,6 +1775,9 @@ public class ProductResourceImpl extends BaseProductResourceImpl {
 
 		return cpDefinition;
 	}
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		ProductResourceImpl.class);
 
 	@Reference
 	private AccountGroupRelLocalService _accountGroupRelLocalService;
