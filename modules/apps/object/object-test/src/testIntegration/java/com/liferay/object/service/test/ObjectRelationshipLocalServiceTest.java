@@ -1005,9 +1005,13 @@ public class ObjectRelationshipLocalServiceTest {
 				externalReferenceCode, TestPropsValues.getUserId(),
 				_objectDefinition1.getObjectDefinitionId(),
 				_objectDefinition2.getObjectDefinitionId(), 0,
-				ObjectRelationshipConstants.DELETION_TYPE_PREVENT, null, false,
-				LocalizedMapUtil.getLocalizedMap("Able"), StringUtil.randomId(),
-				false, ObjectRelationshipConstants.TYPE_MANY_TO_MANY, null);
+				ObjectRelationshipConstants.DELETION_TYPE_PREVENT,
+				HashMapBuilder.put(
+					LocaleUtil.US, "Able"
+				).build(),
+				false, LocalizedMapUtil.getLocalizedMap("Able"),
+				StringUtil.randomId(), false,
+				ObjectRelationshipConstants.TYPE_MANY_TO_MANY, null);
 
 		Assert.assertEquals(
 			externalReferenceCode,
@@ -1039,6 +1043,9 @@ public class ObjectRelationshipLocalServiceTest {
 		Assert.assertEquals(
 			objectRelationship1.getDeletionType(),
 			reverseObjectRelationship.getDeletionType());
+		Assert.assertEquals(
+			objectRelationship1.getDescriptionMap(),
+			reverseObjectRelationship.getDescriptionMap());
 		Assert.assertEquals(
 			objectRelationship1.getLabelMap(),
 			reverseObjectRelationship.getLabelMap());
@@ -1220,6 +1227,91 @@ public class ObjectRelationshipLocalServiceTest {
 
 		_objectRelationshipLocalService.deleteObjectRelationship(
 			systemObjectRelationship);
+	}
+
+	@Test
+	public void testUpdateObjectRelationshipWhenDescriptionMapIsEmpty()
+		throws Exception {
+
+		ObjectRelationship objectRelationship =
+			_objectRelationshipLocalService.addObjectRelationship(
+				null, TestPropsValues.getUserId(),
+				_objectDefinition1.getObjectDefinitionId(),
+				_objectDefinition2.getObjectDefinitionId(), 0,
+				ObjectRelationshipConstants.DELETION_TYPE_PREVENT,
+				HashMapBuilder.put(
+					LocaleUtil.US, "Able"
+				).build(),
+				false, LocalizedMapUtil.getLocalizedMap("Able"),
+				StringUtil.randomId(), false,
+				ObjectRelationshipConstants.TYPE_ONE_TO_MANY, null);
+
+		ObjectField objectField = _objectFieldLocalService.getObjectField(
+			objectRelationship.getObjectFieldId2());
+
+		objectRelationship =
+			_objectRelationshipLocalService.updateObjectRelationship(
+				objectRelationship.getExternalReferenceCode(),
+				objectRelationship.getObjectRelationshipId(), 0,
+				ObjectRelationshipConstants.DELETION_TYPE_PREVENT,
+				Collections.emptyMap(), false, objectRelationship.getLabelMap(),
+				new TextObjectFieldBuilder(
+				).labelMap(
+					objectField.getLabelMap()
+				).name(
+					objectField.getName()
+				).build());
+
+		Assert.assertEquals(
+			"Able", objectRelationship.getDescription(LocaleUtil.US));
+
+		objectField = _objectFieldLocalService.getObjectField(
+			objectRelationship.getObjectFieldId2());
+
+		Assert.assertEquals("Able", objectField.getDescription(LocaleUtil.US));
+	}
+
+	@Test
+	public void testUpdateObjectRelationshipWhenDescriptionMapIsNull()
+		throws Exception {
+
+		ObjectRelationship objectRelationship =
+			_objectRelationshipLocalService.addObjectRelationship(
+				null, TestPropsValues.getUserId(),
+				_objectDefinition1.getObjectDefinitionId(),
+				_objectDefinition2.getObjectDefinitionId(), 0,
+				ObjectRelationshipConstants.DELETION_TYPE_PREVENT,
+				HashMapBuilder.put(
+					LocaleUtil.US, "Able"
+				).build(),
+				false, LocalizedMapUtil.getLocalizedMap("Able"),
+				StringUtil.randomId(), false,
+				ObjectRelationshipConstants.TYPE_ONE_TO_MANY, null);
+
+		Assert.assertEquals(
+			"Able", objectRelationship.getDescription(LocaleUtil.US));
+
+		ObjectField objectField = _objectFieldLocalService.getObjectField(
+			objectRelationship.getObjectFieldId2());
+
+		Assert.assertEquals("Able", objectField.getDescription(LocaleUtil.US));
+
+		_objectRelationshipLocalService.updateObjectRelationship(
+			objectRelationship.getExternalReferenceCode(),
+			objectRelationship.getObjectRelationshipId(), 0,
+			ObjectRelationshipConstants.DELETION_TYPE_PREVENT, null, false,
+			objectRelationship.getLabelMap(),
+			new TextObjectFieldBuilder(
+			).labelMap(
+				objectField.getLabelMap()
+			).name(
+				objectField.getName()
+			).build());
+
+		objectField = _objectFieldLocalService.getObjectField(
+			objectRelationship.getObjectFieldId2());
+
+		Assert.assertEquals("Able", objectField.getDescription(LocaleUtil.US));
 	}
 
 	@Test
