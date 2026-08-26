@@ -132,8 +132,8 @@ public class ObjectDefinitionLocalServiceDBPartitionTest {
 			objectDefinition2 =
 				_objectDefinitionLocalService.addCustomObjectDefinition(
 					null, user.getUserId(), 0, objectDefinition1.getClassName(),
-					true, false, true, false, true, false, true, true, true,
-					null, RandomTestUtil.randomLocaleStringMap(),
+					null, true, false, true, false, true, false, true, true,
+					true, null, RandomTestUtil.randomLocaleStringMap(),
 					objectDefinition1.getShortName(), null, null,
 					RandomTestUtil.randomLocaleStringMap(), true,
 					ObjectDefinitionConstants.SCOPE_COMPANY,
@@ -194,8 +194,8 @@ public class ObjectDefinitionLocalServiceDBPartitionTest {
 
 			ObjectDefinition objectDefinition =
 				_objectDefinitionLocalService.addCustomObjectDefinition(
-					null, user.getUserId(), 0, null, true, false, true, false,
-					true, false, true, true, true, null,
+					null, user.getUserId(), 0, null, null, true, false, true,
+					false, true, false, true, true, true, null,
 					RandomTestUtil.randomLocaleStringMap(),
 					"A" + RandomTestUtil.randomString(), null, null,
 					RandomTestUtil.randomLocaleStringMap(), true,

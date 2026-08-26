@@ -305,8 +305,8 @@ public class ObjectFieldLocalServiceTest {
 			"Salesforce storage type does not support aggregation and " +
 				"attachment business types",
 			() -> _objectDefinitionLocalService.addCustomObjectDefinition(
-				null, TestPropsValues.getUserId(), 0, null, false, false, true,
-				false, true, false, false, false, false, null,
+				null, TestPropsValues.getUserId(), 0, null, null, false, false,
+				true, false, true, false, false, false, false, null,
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 				ObjectDefinitionTestUtil.getRandomName(), null, null,
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
@@ -349,8 +349,8 @@ public class ObjectFieldLocalServiceTest {
 			"Salesforce storage type does not support aggregation and " +
 				"attachment business types",
 			() -> _objectDefinitionLocalService.addCustomObjectDefinition(
-				null, TestPropsValues.getUserId(), 0, null, false, false, true,
-				false, true, false, false, false, false, null,
+				null, TestPropsValues.getUserId(), 0, null, null, false, false,
+				true, false, true, false, false, false, false, null,
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 				ObjectDefinitionTestUtil.getRandomName(), null, null,
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
@@ -411,7 +411,7 @@ public class ObjectFieldLocalServiceTest {
 				null, TestPropsValues.getUserId(),
 				objectDefinition2.getObjectDefinitionId(),
 				objectDefinition3.getObjectDefinitionId(), 0,
-				ObjectRelationshipConstants.DELETION_TYPE_CASCADE, false,
+				ObjectRelationshipConstants.DELETION_TYPE_CASCADE, null, false,
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 				objectRelationshipName, false,
 				ObjectRelationshipConstants.TYPE_ONE_TO_MANY, null);
@@ -510,7 +510,7 @@ public class ObjectFieldLocalServiceTest {
 				null, TestPropsValues.getUserId(),
 				objectDefinition2.getObjectDefinitionId(),
 				objectDefinition3.getObjectDefinitionId(), 0,
-				ObjectRelationshipConstants.DELETION_TYPE_CASCADE, false,
+				ObjectRelationshipConstants.DELETION_TYPE_CASCADE, null, false,
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 				objectRelationshipName, false,
 				ObjectRelationshipConstants.TYPE_MANY_TO_MANY, null);
@@ -1215,7 +1215,7 @@ public class ObjectFieldLocalServiceTest {
 			null, TestPropsValues.getUserId(),
 			objectDefinition.getObjectDefinitionId(),
 			relatedObjectDefinition.getObjectDefinitionId(), 0,
-			ObjectRelationshipConstants.DELETION_TYPE_PREVENT, false,
+			ObjectRelationshipConstants.DELETION_TYPE_PREVENT, null, false,
 			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			"oneToManyRelationshipName", false,
 			ObjectRelationshipConstants.TYPE_ONE_TO_MANY, null);
@@ -1239,7 +1239,7 @@ public class ObjectFieldLocalServiceTest {
 				null, TestPropsValues.getUserId(),
 				objectDefinition.getObjectDefinitionId(),
 				relatedObjectDefinition.getObjectDefinitionId(), 0,
-				ObjectRelationshipConstants.DELETION_TYPE_PREVENT, false,
+				ObjectRelationshipConstants.DELETION_TYPE_PREVENT, null, false,
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 				"relationship", false,
 				ObjectRelationshipConstants.TYPE_ONE_TO_MANY, null);
@@ -2992,7 +2992,7 @@ public class ObjectFieldLocalServiceTest {
 				null, TestPropsValues.getUserId(),
 				objectDefinition1.getObjectDefinitionId(),
 				objectDefinition2.getObjectDefinitionId(), 0,
-				ObjectRelationshipConstants.DELETION_TYPE_CASCADE, false,
+				ObjectRelationshipConstants.DELETION_TYPE_CASCADE, null, false,
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 				StringUtil.randomId(), false,
 				ObjectRelationshipConstants.TYPE_ONE_TO_MANY, null);
@@ -3008,7 +3008,7 @@ public class ObjectFieldLocalServiceTest {
 			objectRelationship.getExternalReferenceCode(),
 			objectRelationship.getObjectRelationshipId(),
 			objectRelationship.getParameterObjectFieldId(),
-			ObjectRelationshipConstants.DELETION_TYPE_DISASSOCIATE, false,
+			ObjectRelationshipConstants.DELETION_TYPE_DISASSOCIATE, null, false,
 			objectRelationship.getLabelMap(), null);
 
 		objectField = _objectFieldLocalService.fetchObjectField(
@@ -3029,7 +3029,7 @@ public class ObjectFieldLocalServiceTest {
 			objectRelationship.getExternalReferenceCode(),
 			objectRelationship.getObjectRelationshipId(),
 			objectRelationship.getParameterObjectFieldId(),
-			ObjectRelationshipConstants.DELETION_TYPE_PREVENT, false,
+			ObjectRelationshipConstants.DELETION_TYPE_PREVENT, null, false,
 			objectRelationship.getLabelMap(), null);
 
 		objectField = _objectFieldLocalService.updateRequired(
@@ -3128,7 +3128,7 @@ public class ObjectFieldLocalServiceTest {
 				}
 
 				_objectDefinitionLocalService.addCustomObjectDefinition(
-					null, TestPropsValues.getUserId(), 0, null,
+					null, TestPropsValues.getUserId(), 0, null, null,
 					enableCategorization, false, true, false, true, false,
 					false, false, false, null,
 					LocalizedMapUtil.getLocalizedMap(
@@ -3228,7 +3228,7 @@ public class ObjectFieldLocalServiceTest {
 			objectField.getExternalReferenceCode(), TestPropsValues.getUserId(),
 			objectField.getListTypeDefinitionId(),
 			objectField.getObjectDefinitionId(), objectField.getBusinessType(),
-			objectField.getDBType(), objectField.isIndexed(),
+			objectField.getDBType(), null, objectField.isIndexed(),
 			objectField.isIndexedAsKeyword(),
 			objectField.getIndexedLanguageId(), objectField.getLabelMap(),
 			objectField.isLocalized(), objectField.getName(),
@@ -3255,7 +3255,7 @@ public class ObjectFieldLocalServiceTest {
 			objectField.getObjectFieldId(), TestPropsValues.getUserId(),
 			objectField.getListTypeDefinitionId(),
 			objectField.getObjectDefinitionId(), objectField.getBusinessType(),
-			objectField.getDBType(), objectField.isIndexed(),
+			objectField.getDBType(), null, objectField.isIndexed(),
 			objectField.isIndexedAsKeyword(),
 			objectField.getIndexedLanguageId(), objectField.getLabelMap(),
 			objectField.isLocalized(), objectField.getName(),
@@ -3276,7 +3276,7 @@ public class ObjectFieldLocalServiceTest {
 		return _objectFieldLocalService.addOrUpdateSystemObjectField(
 			externalReferenceCode, TestPropsValues.getUserId(), 0L,
 			objectDefinitionId, businessType, dbColumnName, dbTableName, dbType,
-			indexed, indexedAsKeyword, "", labelMap, localized, name,
+			null, indexed, indexedAsKeyword, "", labelMap, localized, name,
 			ObjectFieldConstants.READ_ONLY_FALSE, null, required, false,
 			Collections.emptyList());
 	}
@@ -3399,7 +3399,7 @@ public class ObjectFieldLocalServiceTest {
 		return _objectFieldLocalService.addSystemObjectField(
 			null, TestPropsValues.getUserId(), 0L, objectDefinitionId,
 			ObjectFieldConstants.BUSINESS_TYPE_TEXT, null, null,
-			ObjectFieldConstants.DB_TYPE_STRING, false, true, "",
+			ObjectFieldConstants.DB_TYPE_STRING, null, false, true, "",
 			LocalizedMapUtil.getLocalizedMap(name), false, name,
 			ObjectFieldConstants.READ_ONLY_FALSE, null, false, false,
 			objectFieldSettings);
@@ -3810,7 +3810,7 @@ public class ObjectFieldLocalServiceTest {
 			null, TestPropsValues.getUserId(),
 			objectDefinition1.getObjectDefinitionId(),
 			objectDefinition2.getObjectDefinitionId(), 0,
-			ObjectRelationshipConstants.DELETION_TYPE_CASCADE, false,
+			ObjectRelationshipConstants.DELETION_TYPE_CASCADE, null, false,
 			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			"oneToManyRelationshipName", false,
 			ObjectRelationshipConstants.TYPE_ONE_TO_MANY, null);
@@ -3838,8 +3838,8 @@ public class ObjectFieldLocalServiceTest {
 
 		objectDefinition1 =
 			_objectDefinitionLocalService.addCustomObjectDefinition(
-				null, TestPropsValues.getUserId(), 0, null, false, false, true,
-				false, true, false, false, false, false, null,
+				null, TestPropsValues.getUserId(), 0, null, null, false, false,
+				true, false, true, false, false, false, false, null,
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 				"Test", null, null,
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
@@ -3974,7 +3974,7 @@ public class ObjectFieldLocalServiceTest {
 			objectField.getObjectFieldId(), TestPropsValues.getUserId(),
 			objectField.getListTypeDefinitionId(),
 			objectField.getObjectDefinitionId(), objectField.getBusinessType(),
-			objectField.getDBType(), objectField.isIndexed(),
+			objectField.getDBType(), null, objectField.isIndexed(),
 			objectField.isIndexedAsKeyword(),
 			objectField.getIndexedLanguageId(), objectField.getLabelMap(),
 			objectField.isLocalized(), objectField.getName(), readOnly,

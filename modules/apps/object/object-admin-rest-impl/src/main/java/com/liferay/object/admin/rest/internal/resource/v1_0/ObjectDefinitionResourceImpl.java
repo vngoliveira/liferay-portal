@@ -371,7 +371,7 @@ public class ObjectDefinitionResourceImpl
 						_getObjectFolderId(
 							objectDefinition.
 								getObjectFolderExternalReferenceCode()),
-						objectDefinition.getClassName(),
+						objectDefinition.getClassName(), null,
 						_isEnableCategorization(objectDefinition),
 						GetterUtil.getBoolean(
 							objectDefinition.getEnableComments()),
@@ -423,7 +423,7 @@ public class ObjectDefinitionResourceImpl
 						_getObjectFolderId(
 							objectDefinition.
 								getObjectFolderExternalReferenceCode()),
-						objectDefinition.getClassName(),
+						objectDefinition.getClassName(), null,
 						_isEnableCategorization(objectDefinition),
 						GetterUtil.getBoolean(
 							objectDefinition.getEnableComments()),
@@ -688,7 +688,7 @@ public class ObjectDefinitionResourceImpl
 						GetterUtil.getBoolean(
 							objectDefinition.getActive(),
 							serviceBuilderObjectDefinition.isActive()),
-						objectDefinition.getClassName(),
+						objectDefinition.getClassName(), null,
 						GetterUtil.getBoolean(
 							objectDefinition.getEnableCategorization(), true),
 						GetterUtil.getBoolean(
@@ -1581,6 +1581,7 @@ public class ObjectDefinitionResourceImpl
 				serviceBuilderObjectField.getListTypeDefinitionId(),
 				objectDefinitionId, serviceBuilderObjectField.getBusinessType(),
 				null, dbTableName, serviceBuilderObjectField.getDBType(),
+				serviceBuilderObjectField.getDescriptionMap(),
 				serviceBuilderObjectField.isIndexed(),
 				serviceBuilderObjectField.isIndexedAsKeyword(),
 				serviceBuilderObjectField.getIndexedLanguageId(),
