@@ -75,6 +75,10 @@ public interface SystemObjectDefinitionManager {
 		return 0L;
 	}
 
+	public default Map<Locale, String> getDescriptionMap() {
+		return null;
+	}
+
 	public String getExternalReferenceCode();
 
 	public JaxRsApplicationDescriptor getJaxRsApplicationDescriptor();

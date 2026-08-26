@@ -18,6 +18,7 @@ import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.MapUtil;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.vulcan.extension.ExtensionProvider;
 import com.liferay.portal.vulcan.extension.ExtensionProviderRegistry;
 import com.liferay.portal.vulcan.extension.PropertyDefinition;
@@ -49,6 +50,18 @@ public abstract class BaseSystemObjectDefinitionManager
 			objectEntryService.getModelResourcePermission(objectDefinitionId);
 
 		modelResourcePermission.check(permissionChecker, primaryKey, actionId);
+	}
+
+	@Override
+	public Map<Locale, String> getDescriptionMap() {
+		String descriptionKey = MapUtil.getString(
+			getLabelKeys(), "description");
+
+		if (Validator.isNull(descriptionKey)) {
+			return null;
+		}
+
+		return createLabelMap(descriptionKey);
 	}
 
 	@Override
