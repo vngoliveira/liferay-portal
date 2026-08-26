@@ -697,7 +697,7 @@ public class BatchEngineImportTaskExecutorTest
 
 		_objectFieldLocalService.addCustomObjectField(
 			null, user.getUserId(), 0, objectDefinition.getObjectDefinitionId(),
-			"Integer", "Integer", true, false, null,
+			"Integer", "Integer", null, true, false, null,
 			HashMapBuilder.put(
 				LocaleUtil.fromLanguageId("en_US"), integerFieldName
 			).build(),
@@ -708,7 +708,7 @@ public class BatchEngineImportTaskExecutorTest
 
 		_objectFieldLocalService.addCustomObjectField(
 			null, user.getUserId(), 0, objectDefinition.getObjectDefinitionId(),
-			"Text", "String", true, false, "en_US",
+			"Text", "String", null, true, false, "en_US",
 			HashMapBuilder.put(
 				LocaleUtil.fromLanguageId("en_US"), textFieldName
 			).build(),
