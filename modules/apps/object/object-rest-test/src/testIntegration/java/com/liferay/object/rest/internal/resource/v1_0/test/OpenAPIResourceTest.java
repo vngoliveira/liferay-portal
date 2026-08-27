@@ -16,6 +16,7 @@ import com.liferay.object.constants.ObjectFieldConstants;
 import com.liferay.object.constants.ObjectFieldSettingConstants;
 import com.liferay.object.constants.ObjectRelationshipConstants;
 import com.liferay.object.field.builder.MultiselectPicklistObjectFieldBuilder;
+import com.liferay.object.field.builder.TextObjectFieldBuilder;
 import com.liferay.object.field.setting.builder.ObjectFieldSettingBuilder;
 import com.liferay.object.field.util.ObjectFieldUtil;
 import com.liferay.object.model.ObjectDefinition;
@@ -43,6 +44,7 @@ import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
 import com.liferay.portal.kernel.util.FileUtil;
+import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.Http;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
@@ -448,6 +450,77 @@ public class OpenAPIResourceTest {
 
 		Assert.assertNotNull(propertiesJSONObject.opt("comments"));
 		Assert.assertNull(propertiesJSONObject.opt("version"));
+	}
+
+	@Test
+	public void testGetOpenAPIWithDescriptions() throws Exception {
+		ObjectDefinition objectDefinition =
+			ObjectDefinitionTestUtil.publishObjectDefinition(
+				"Object5",
+				Collections.singletonList(
+					new TextObjectFieldBuilder(
+					).descriptionMap(
+						HashMapBuilder.put(
+							LocaleUtil.US, "Field description"
+						).build()
+					).labelMap(
+						LocalizedMapUtil.getLocalizedMap("field5")
+					).name(
+						"field5"
+					).build()),
+				ObjectDefinitionConstants.SCOPE_COMPANY);
+
+		_objectDefinitions.add(objectDefinition);
+
+		ObjectRelationshipLocalServiceUtil.addObjectRelationship(
+			null, TestPropsValues.getUserId(),
+			_objectDefinition.getObjectDefinitionId(),
+			objectDefinition.getObjectDefinitionId(), 0,
+			ObjectRelationshipConstants.DELETION_TYPE_PREVENT,
+			HashMapBuilder.put(
+				LocaleUtil.US, "Relationship description"
+			).build(),
+			false, LocalizedMapUtil.getLocalizedMap("relationship5"),
+			"relationship5", false,
+			ObjectRelationshipConstants.TYPE_ONE_TO_MANY, null);
+
+		JSONObject jsonObject = HTTPTestUtil.invokeToJSONObject(
+			null, objectDefinition.getRESTContextPath() + "/openapi.json",
+			Http.Method.GET);
+
+		JSONObject propertiesJSONObject = jsonObject.getJSONObject(
+			"components"
+		).getJSONObject(
+			"schemas"
+		).getJSONObject(
+			objectDefinition.getShortName()
+		).getJSONObject(
+			"properties"
+		);
+
+		Assert.assertEquals(
+			"Field description",
+			propertiesJSONObject.getJSONObject(
+				"field5"
+			).getString(
+				"description"
+			));
+
+		JSONObject relationshipJSONObject = propertiesJSONObject.getJSONObject(
+			"relationship5");
+
+		Assert.assertEquals(
+			"Relationship description",
+			relationshipJSONObject.getString("description"));
+		Assert.assertEquals(
+			"#/components/schemas/" + _objectDefinition.getShortName(),
+			relationshipJSONObject.getJSONArray(
+				"allOf"
+			).getJSONObject(
+				0
+			).getString(
+				"$ref"
+			));
 	}
 
 	@Test
