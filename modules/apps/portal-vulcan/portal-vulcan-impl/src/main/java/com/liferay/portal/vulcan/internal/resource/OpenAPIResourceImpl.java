@@ -510,6 +510,14 @@ public class OpenAPIResourceImpl implements OpenAPIResource {
 			_updateSchemaReferences(additionalPropertiesSchema, schemaPrefix);
 		}
 
+		List<Schema> allOfSchemas = schema.getAllOf();
+
+		if (allOfSchemas != null) {
+			for (Schema allOfSchema : allOfSchemas) {
+				_updateSchemaReferences(allOfSchema, schemaPrefix);
+			}
+		}
+
 		if (schema instanceof ArraySchema) {
 			ArraySchema arraySchema = (ArraySchema)schema;
 
@@ -1082,6 +1090,14 @@ public class OpenAPIResourceImpl implements OpenAPIResource {
 
 					_replaceReference(entry, propertySchema);
 
+					List<Schema> allOfSchemas = propertySchema.getAllOf();
+
+					if (allOfSchemas != null) {
+						for (Schema allOfSchema : allOfSchemas) {
+							_replaceReference(entry, allOfSchema);
+						}
+					}
+
 					if (propertySchema instanceof ArraySchema) {
 						ArraySchema arraySchema = (ArraySchema)propertySchema;
 
@@ -1193,9 +1209,14 @@ public class OpenAPIResourceImpl implements OpenAPIResource {
 						if (StringUtil.equals(
 								childDTOProperty.getType(), "Object")) {
 
-							schema.set$ref(
-								"#/components/schemas/" +
-									childDTOProperty.getName());
+							schema.addAllOfItem(
+								new Schema() {
+									{
+										set$ref(
+											"#/components/schemas/" +
+												childDTOProperty.getName());
+									}
+								});
 						}
 						else {
 							schema.addProperties(
