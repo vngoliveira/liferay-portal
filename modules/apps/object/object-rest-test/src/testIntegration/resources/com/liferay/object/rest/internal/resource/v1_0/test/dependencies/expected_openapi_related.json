@@ -516,7 +516,6 @@
 				}
 			},
 			"Object1": {
-				"description": "Information about the relationship relationship2 can be embedded with \"nestedFields\".",
 				"properties": {
 					"actions": {
 						"additionalProperties": {
@@ -1460,7 +1459,13 @@
 						"type": "array"
 					},
 					"relationship2": {
-						"$ref": "#/components/schemas/Object1"
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/Object1"
+							}
+						],
+						"description": "Information about the relationship relationship2 can be embedded with \"nestedFields\".",
+						"type": "object"
 					},
 					"relationship2ERC": {
 						"readOnly": true,

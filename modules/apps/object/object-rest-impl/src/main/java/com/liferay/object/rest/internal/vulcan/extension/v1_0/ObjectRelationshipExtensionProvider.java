@@ -11,6 +11,7 @@ import com.liferay.object.model.ObjectRelationship;
 import com.liferay.object.related.models.ObjectRelatedModelsProviderRegistry;
 import com.liferay.object.relationship.util.ObjectRelationshipUtil;
 import com.liferay.object.rest.dto.v1_0.ObjectEntry;
+import com.liferay.object.rest.internal.util.ObjectDescriptionUtil;
 import com.liferay.object.rest.internal.util.ServiceContextUtil;
 import com.liferay.object.rest.manager.v1_0.DefaultObjectEntryManager;
 import com.liferay.object.rest.manager.v1_0.DefaultObjectEntryManagerProvider;
@@ -172,10 +173,7 @@ public class ObjectRelationshipExtensionProvider
 					Collections.singleton(ObjectEntry.class), null,
 					StringUtil.removeFirst(
 						relatedObjectDefinition.getName(), "C_"),
-					StringBundler.concat(
-						"Information about the object relationship ",
-						objectRelationship.getName(),
-						" can be embedded with \"nestedFields\"."),
+					_getDescription(objectDefinition, objectRelationship),
 					objectRelationship.getName(),
 					_getPropertyType(objectDefinition, objectRelationship),
 					new DefaultPropertyValidator(), false));
@@ -286,6 +284,23 @@ public class ObjectRelationshipExtensionProvider
 		defaultDTOConverterContext.setAttribute("addActions", Boolean.FALSE);
 
 		return defaultDTOConverterContext;
+	}
+
+	private String _getDescription(
+		ObjectDefinition objectDefinition,
+		ObjectRelationship objectRelationship) {
+
+		String description = ObjectDescriptionUtil.getDescription(
+			objectDefinition, objectRelationship);
+
+		if (Validator.isNotNull(description)) {
+			return description;
+		}
+
+		return StringBundler.concat(
+			"Information about the object relationship ",
+			objectRelationship.getName(),
+			" can be embedded with \"nestedFields\".");
 	}
 
 	private long _getGroupId(
