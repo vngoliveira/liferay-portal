@@ -371,7 +371,10 @@ public class ObjectDefinitionResourceImpl
 						_getObjectFolderId(
 							objectDefinition.
 								getObjectFolderExternalReferenceCode()),
-						objectDefinition.getClassName(), null,
+						objectDefinition.getClassName(),
+						LocalizedMapUtil.populateLocalizedMap(
+							objectDefinition.getDefaultLanguageId(),
+							objectDefinition.getDescription()),
 						_isEnableCategorization(objectDefinition),
 						GetterUtil.getBoolean(
 							objectDefinition.getEnableComments()),
@@ -423,7 +426,10 @@ public class ObjectDefinitionResourceImpl
 						_getObjectFolderId(
 							objectDefinition.
 								getObjectFolderExternalReferenceCode()),
-						objectDefinition.getClassName(), null,
+						objectDefinition.getClassName(),
+						LocalizedMapUtil.populateLocalizedMap(
+							objectDefinition.getDefaultLanguageId(),
+							objectDefinition.getDescription()),
 						_isEnableCategorization(objectDefinition),
 						GetterUtil.getBoolean(
 							objectDefinition.getEnableComments()),
@@ -688,7 +694,10 @@ public class ObjectDefinitionResourceImpl
 						GetterUtil.getBoolean(
 							objectDefinition.getActive(),
 							serviceBuilderObjectDefinition.isActive()),
-						objectDefinition.getClassName(), null,
+						objectDefinition.getClassName(),
+						LocalizedMapUtil.populateLocalizedMap(
+							objectDefinition.getDefaultLanguageId(),
+							objectDefinition.getDescription()),
 						GetterUtil.getBoolean(
 							objectDefinition.getEnableCategorization(), true),
 						GetterUtil.getBoolean(
