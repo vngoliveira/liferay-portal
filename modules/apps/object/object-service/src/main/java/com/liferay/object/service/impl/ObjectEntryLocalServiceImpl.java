@@ -1262,7 +1262,7 @@ public class ObjectEntryLocalServiceImpl
 		ObjectField titleObjectField = objectFieldBag.getObjectField(
 			objectDefinition.getTitleObjectFieldId());
 
-		if (!titleObjectField.isIndexed() &&
+		if ((titleObjectField != null) && !titleObjectField.isIndexed() &&
 			!Objects.equals(
 				titleObjectField.getName(), "externalReferenceCode") &&
 			!Objects.equals(titleObjectField.getName(), "id")) {
