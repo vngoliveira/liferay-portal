@@ -20,7 +20,7 @@
 		{
 			"active": true,
 			"conditionExpression": "",
-			"description": "",
+			"description": {},
 			"label": {
 				"en_US": "testAction"
 			},

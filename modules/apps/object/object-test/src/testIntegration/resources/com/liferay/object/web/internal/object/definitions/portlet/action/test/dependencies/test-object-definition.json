@@ -24,7 +24,7 @@
 		{
 			"active": true,
 			"conditionExpression": "",
-			"description": "",
+			"description": {},
 			"label": {
 				"en_US": "Action 2"
 			},
@@ -43,7 +43,7 @@
 		{
 			"active": true,
 			"conditionExpression": "",
-			"description": "",
+			"description": {},
 			"label": {
 				"en_US": "Action 3"
 			},
