@@ -105,7 +105,8 @@ public class ObjectActionLocalServiceImpl
 	@Override
 	public ObjectAction addObjectAction(
 			String externalReferenceCode, long userId, long objectDefinitionId,
-			boolean active, String conditionExpression, String description,
+			boolean active, String conditionExpression,
+			Map<Locale, String> descriptionMap,
 			Map<Locale, String> errorMessageMap, Map<Locale, String> labelMap,
 			String name, String objectActionExecutorKey,
 			String objectActionTriggerKey,
@@ -150,13 +151,14 @@ public class ObjectActionLocalServiceImpl
 		objectAction.setObjectDefinitionId(objectDefinitionId);
 		objectAction.setActive(active);
 		objectAction.setConditionExpression(conditionExpression);
-		objectAction.setDescription(description);
 		objectAction.setErrorMessageMap(
 			errorMessageMap, LocaleUtil.getSiteDefault());
 		objectAction.setLabelMap(
 			_populateLabelMap(
 				labelMap, name, objectDefinition.getDefaultLocale()),
 			objectDefinition.getDefaultLocale());
+		objectAction.setDescriptionMap(
+			descriptionMap, objectDefinition.getDefaultLocale());
 		objectAction.setName(name);
 		objectAction.setObjectActionExecutorKey(objectActionExecutorKey);
 		objectAction.setObjectActionTriggerKey(objectActionTriggerKey);
@@ -189,7 +191,8 @@ public class ObjectActionLocalServiceImpl
 	public ObjectAction addOrUpdateObjectAction(
 			String externalReferenceCode, long objectActionId, long userId,
 			long objectDefinitionId, boolean active, String conditionExpression,
-			String description, Map<Locale, String> errorMessageMap,
+			Map<Locale, String> descriptionMap,
+			Map<Locale, String> errorMessageMap,
 			Map<Locale, String> labelMap, String name,
 			String objectActionExecutorKey, String objectActionTriggerKey,
 			UnicodeProperties parametersUnicodeProperties, boolean system)
@@ -217,14 +220,14 @@ public class ObjectActionLocalServiceImpl
 		if (existingObjectAction != null) {
 			return updateObjectAction(
 				externalReferenceCode, existingObjectAction.getObjectActionId(),
-				active, conditionExpression, description, errorMessageMap,
+				active, conditionExpression, descriptionMap, errorMessageMap,
 				labelMap, name, objectActionExecutorKey, objectActionTriggerKey,
 				parametersUnicodeProperties);
 		}
 
 		return addObjectAction(
 			externalReferenceCode, userId, objectDefinitionId, active,
-			conditionExpression, description, errorMessageMap, labelMap, name,
+			conditionExpression, descriptionMap, errorMessageMap, labelMap, name,
 			objectActionExecutorKey, objectActionTriggerKey,
 			parametersUnicodeProperties, system);
 	}
@@ -440,7 +443,7 @@ public class ObjectActionLocalServiceImpl
 	@Override
 	public ObjectAction updateObjectAction(
 			String externalReferenceCode, long objectActionId, boolean active,
-			String conditionExpression, String description,
+			String conditionExpression, Map<Locale, String> descriptionMap,
 			Map<Locale, String> errorMessageMap, Map<Locale, String> labelMap,
 			String name, String objectActionExecutorKey,
 			String objectActionTriggerKey,
@@ -484,9 +487,11 @@ public class ObjectActionLocalServiceImpl
 
 		objectAction.setActive(active);
 		objectAction.setConditionExpression(conditionExpression);
-		objectAction.setDescription(description);
 		objectAction.setErrorMessageMap(
 			errorMessageMap, LocaleUtil.getSiteDefault());
+		objectAction.setDescriptionMap(
+			_getDescriptionMap(descriptionMap),
+			objectDefinition.getDefaultLocale());
 
 		if (objectDefinition.isApproved()) {
 			objectAction.setLabelMap(
@@ -548,6 +553,16 @@ public class ObjectActionLocalServiceImpl
 		objectAction.setStatus(status);
 
 		return objectActionPersistence.update(objectAction);
+	}
+
+	private Map<Locale, String> _getDescriptionMap(
+		Map<Locale, String> descriptionMap) {
+
+		if (MapUtil.isEmpty(descriptionMap)) {
+			return null;
+		}
+
+		return descriptionMap;
 	}
 
 	private boolean _isUsePreferredLanguageForGuestsSupported(
