@@ -48,8 +48,8 @@ public class ObjectActionServiceImpl extends ObjectActionServiceBaseImpl {
 
 		return objectActionLocalService.addObjectAction(
 			externalReferenceCode, getUserId(), objectDefinitionId, active,
-			conditionExpression, descriptionMap, errorMessageMap, labelMap, name,
-			objectActionExecutorKey, objectActionTriggerKey,
+			conditionExpression, descriptionMap, errorMessageMap, labelMap,
+			name, objectActionExecutorKey, objectActionTriggerKey,
 			parametersUnicodeProperties, system);
 	}
 
@@ -84,8 +84,7 @@ public class ObjectActionServiceImpl extends ObjectActionServiceBaseImpl {
 	@Override
 	public ObjectAction updateObjectAction(
 			String externalReferenceCode, long objectActionId, boolean active,
-			String conditionExpression,
-			Map<Locale, String> descriptionMap,
+			String conditionExpression, Map<Locale, String> descriptionMap,
 			Map<Locale, String> errorMessageMap, Map<Locale, String> labelMap,
 			String name, String objectActionExecutorKey,
 			String objectActionTriggerKey,

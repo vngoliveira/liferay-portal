@@ -47,7 +47,6 @@ import com.liferay.object.service.persistence.ObjectFieldPersistence;
 import com.liferay.petra.lang.SafeCloseable;
 import com.liferay.petra.reflect.ReflectionUtil;
 import com.liferay.petra.string.StringBundler;
-import com.liferay.petra.string.StringPool;
 import com.liferay.portal.aop.AopService;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONArray;
@@ -192,9 +191,9 @@ public class ObjectActionLocalServiceImpl
 			String externalReferenceCode, long objectActionId, long userId,
 			long objectDefinitionId, boolean active, String conditionExpression,
 			Map<Locale, String> descriptionMap,
-			Map<Locale, String> errorMessageMap,
-			Map<Locale, String> labelMap, String name,
-			String objectActionExecutorKey, String objectActionTriggerKey,
+			Map<Locale, String> errorMessageMap, Map<Locale, String> labelMap,
+			String name, String objectActionExecutorKey,
+			String objectActionTriggerKey,
 			UnicodeProperties parametersUnicodeProperties, boolean system)
 		throws PortalException {
 
@@ -227,8 +226,8 @@ public class ObjectActionLocalServiceImpl
 
 		return addObjectAction(
 			externalReferenceCode, userId, objectDefinitionId, active,
-			conditionExpression, descriptionMap, errorMessageMap, labelMap, name,
-			objectActionExecutorKey, objectActionTriggerKey,
+			conditionExpression, descriptionMap, errorMessageMap, labelMap,
+			name, objectActionExecutorKey, objectActionTriggerKey,
 			parametersUnicodeProperties, system);
 	}
 
@@ -277,7 +276,7 @@ public class ObjectActionLocalServiceImpl
 					null, objectDefinition.getUserId(),
 					objectDefinition.getObjectDefinitionId(), true,
 					MapUtil.getString(entry.getValue(), "conditionExpression"),
-					StringPool.BLANK, null,
+					null, null,
 					LocalizedMapUtil.getLocalizedMap(
 						MapUtil.getString(entry.getValue(), "label")),
 					entry.getKey(),
