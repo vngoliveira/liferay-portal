@@ -3325,6 +3325,40 @@ public class ObjectActionLocalServiceTest {
 		_objectActionLocalService.deleteObjectAction(systemObjectAction);
 	}
 
+	@Test
+	public void testUpdateObjectActionWhenDescriptionMapIsEmpty()
+		throws Exception {
+
+		ObjectAction objectAction = _objectActionLocalService.addObjectAction(
+			RandomTestUtil.randomString(), TestPropsValues.getUserId(),
+			_objectDefinition.getObjectDefinitionId(), true,
+			"equals(firstName, \"John\")",
+			LocalizedMapUtil.getLocalizedMap("Able Description"),
+			LocalizedMapUtil.getLocalizedMap("Able Error Message"),
+			LocalizedMapUtil.getLocalizedMap("Able Label"), "Able",
+			ObjectActionExecutorConstants.KEY_WEBHOOK,
+			ObjectActionTriggerConstants.KEY_ON_AFTER_ADD,
+			UnicodePropertiesBuilder.put(
+				"secret", "0123456789"
+			).put(
+				"url", "https://onafteradd.com"
+			).build(),
+			false);
+
+		objectAction = _objectActionLocalService.updateObjectAction(
+			objectAction.getExternalReferenceCode(),
+			objectAction.getObjectActionId(), objectAction.isActive(),
+			objectAction.getConditionExpression(), Collections.emptyMap(),
+			objectAction.getErrorMessageMap(), objectAction.getLabelMap(),
+			objectAction.getName(), objectAction.getObjectActionExecutorKey(),
+			objectAction.getObjectActionTriggerKey(),
+			objectAction.getParametersUnicodeProperties());
+
+		Assert.assertEquals(
+			"Able Description", objectAction.getDescription(LocaleUtil.US));
+	}
+
+
 	@Rule
 	public TestName testName = new TestName();
 
