@@ -63,7 +63,8 @@ public class ObjectActionDescriptionUpgradeProcessTest {
 		ObjectAction objectAction = _objectActionLocalService.addObjectAction(
 			RandomTestUtil.randomString(), TestPropsValues.getUserId(),
 			objectDefinition.getObjectDefinitionId(), true, StringPool.BLANK,
-			null, LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
+			null,
+			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			"a" + RandomTestUtil.randomString(),
 			ObjectActionExecutorConstants.KEY_WEBHOOK,

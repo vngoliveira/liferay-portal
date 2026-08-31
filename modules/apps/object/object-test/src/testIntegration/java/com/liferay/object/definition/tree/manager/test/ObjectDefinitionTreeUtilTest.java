@@ -2707,7 +2707,8 @@ public class ObjectDefinitionTreeUtilTest {
 		ObjectAction objectAction = _objectActionLocalService.addObjectAction(
 			RandomTestUtil.randomString(), TestPropsValues.getUserId(),
 			rootObjectDefinition.getObjectDefinitionId(), true,
-			StringPool.BLANK, LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
+			StringPool.BLANK,
+			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			RandomTestUtil.randomString(),

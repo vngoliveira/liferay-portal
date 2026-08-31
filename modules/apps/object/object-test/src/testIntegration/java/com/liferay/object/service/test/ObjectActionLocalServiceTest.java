@@ -1206,7 +1206,8 @@ public class ObjectActionLocalServiceTest {
 		ObjectAction objectAction1 = _objectActionLocalService.addObjectAction(
 			RandomTestUtil.randomString(), TestPropsValues.getUserId(),
 			commerceOrderObjectDefinition.getObjectDefinitionId(), true,
-			"oldValue(\"orderStatus\") == 1", LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
+			"oldValue(\"orderStatus\") == 1",
+			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			RandomTestUtil.randomString(),
@@ -1235,7 +1236,8 @@ public class ObjectActionLocalServiceTest {
 		ObjectAction objectAction2 = _objectActionLocalService.addObjectAction(
 			RandomTestUtil.randomString(), TestPropsValues.getUserId(),
 			commerceOrderObjectDefinition.getObjectDefinitionId(), true,
-			"orderStatus == 10", LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
+			"orderStatus == 10",
+			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			RandomTestUtil.randomString(),
@@ -1992,7 +1994,8 @@ public class ObjectActionLocalServiceTest {
 			_objectActionLocalService.addObjectAction(
 				RandomTestUtil.randomString(), TestPropsValues.getUserId(),
 				_objectDefinition.getObjectDefinitionId(), true,
-				"equals(firstName, \"John\")", LocalizedMapUtil.getLocalizedMap("Able Description"),
+				"equals(firstName, \"John\")",
+				LocalizedMapUtil.getLocalizedMap("Able Description"),
 				LocalizedMapUtil.getLocalizedMap("Able Error Message"),
 				LocalizedMapUtil.getLocalizedMap("Able Label"), "Able",
 				ObjectActionExecutorConstants.KEY_WEBHOOK,
@@ -2421,7 +2424,8 @@ public class ObjectActionLocalServiceTest {
 		_objectActionLocalService.addObjectAction(
 			RandomTestUtil.randomString(), TestPropsValues.getUserId(),
 			objectDefinition.getObjectDefinitionId(), true,
-			"oldValue(\"name\") == \"Paul\"", LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
+			"oldValue(\"name\") == \"Paul\"",
+			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			RandomTestUtil.randomString(),
@@ -2717,7 +2721,8 @@ public class ObjectActionLocalServiceTest {
 		_objectActionLocalService.updateObjectAction(
 			objectAction.getExternalReferenceCode(),
 			objectAction.getObjectActionId(), true,
-			objectAction.getConditionExpression(), LocalizedMapUtil.getLocalizedMap(StringPool.BLANK),
+			objectAction.getConditionExpression(),
+			LocalizedMapUtil.getLocalizedMap(StringPool.BLANK),
 			objectAction.getErrorMessageMap(), objectAction.getLabelMap(),
 			objectAction.getName(), objectAction.getObjectActionExecutorKey(),
 			objectAction.getObjectActionTriggerKey(), unicodeProperties);
@@ -3161,7 +3166,8 @@ public class ObjectActionLocalServiceTest {
 		ObjectAction objectAction = _objectActionLocalService.addObjectAction(
 			externalReferenceCode1, TestPropsValues.getUserId(),
 			_objectDefinition.getObjectDefinitionId(), true,
-			"equals(firstName, \"John\")", LocalizedMapUtil.getLocalizedMap("Able Description"),
+			"equals(firstName, \"John\")",
+			LocalizedMapUtil.getLocalizedMap("Able Description"),
 			LocalizedMapUtil.getLocalizedMap("Able Error Message"),
 			LocalizedMapUtil.getLocalizedMap("Able Label"), "Able",
 			ObjectActionExecutorConstants.KEY_WEBHOOK,
@@ -3174,7 +3180,8 @@ public class ObjectActionLocalServiceTest {
 			false);
 
 		_assertObjectAction(
-			true, "equals(firstName, \"John\")", LocalizedMapUtil.getLocalizedMap("Able Description"),
+			true, "equals(firstName, \"John\")",
+			LocalizedMapUtil.getLocalizedMap("Able Description"),
 			LocalizedMapUtil.getLocalizedMap("Able Error Message"),
 			LocalizedMapUtil.getLocalizedMap("Able Label"), "Able",
 			objectAction, ObjectActionExecutorConstants.KEY_WEBHOOK,
@@ -3188,7 +3195,8 @@ public class ObjectActionLocalServiceTest {
 
 		objectAction = _objectActionLocalService.updateObjectAction(
 			externalReferenceCode1, objectAction.getObjectActionId(), false,
-			"equals(firstName, \"João\")", LocalizedMapUtil.getLocalizedMap("Baker Description"),
+			"equals(firstName, \"João\")",
+			LocalizedMapUtil.getLocalizedMap("Baker Description"),
 			LocalizedMapUtil.getLocalizedMap("Baker Error Message"),
 			LocalizedMapUtil.getLocalizedMap("Baker Label"), "Baker",
 			ObjectActionExecutorConstants.KEY_GROOVY,
@@ -3200,7 +3208,8 @@ public class ObjectActionLocalServiceTest {
 			).build());
 
 		_assertObjectAction(
-			false, "equals(firstName, \"João\")", LocalizedMapUtil.getLocalizedMap("Baker Description"),
+			false, "equals(firstName, \"João\")",
+			LocalizedMapUtil.getLocalizedMap("Baker Description"),
 			LocalizedMapUtil.getLocalizedMap("Baker Error Message"),
 			LocalizedMapUtil.getLocalizedMap("Baker Label"), "Baker",
 			objectAction, ObjectActionExecutorConstants.KEY_GROOVY,
@@ -3216,7 +3225,8 @@ public class ObjectActionLocalServiceTest {
 
 		objectAction = _objectActionLocalService.updateObjectAction(
 			externalReferenceCode1, objectAction.getObjectActionId(), true,
-			"equals(firstName, \"John\")", LocalizedMapUtil.getLocalizedMap("Charlie Description"),
+			"equals(firstName, \"John\")",
+			LocalizedMapUtil.getLocalizedMap("Charlie Description"),
 			LocalizedMapUtil.getLocalizedMap("Charlie Error Message"),
 			LocalizedMapUtil.getLocalizedMap("Charlie Label"), "Charlie",
 			ObjectActionExecutorConstants.KEY_WEBHOOK,
@@ -3228,7 +3238,8 @@ public class ObjectActionLocalServiceTest {
 			).build());
 
 		_assertObjectAction(
-			true, "equals(firstName, \"John\")", LocalizedMapUtil.getLocalizedMap("Charlie Description"),
+			true, "equals(firstName, \"John\")",
+			LocalizedMapUtil.getLocalizedMap("Charlie Description"),
 			LocalizedMapUtil.getLocalizedMap("Charlie Error Message"),
 			LocalizedMapUtil.getLocalizedMap("Charlie Label"), "Baker",
 			objectAction, ObjectActionExecutorConstants.KEY_WEBHOOK,
@@ -3246,7 +3257,8 @@ public class ObjectActionLocalServiceTest {
 			_objectActionLocalService.addObjectAction(
 				externalReferenceCode2, TestPropsValues.getUserId(),
 				_objectDefinition.getObjectDefinitionId(), true,
-				"equals(firstName, \"John\")", LocalizedMapUtil.getLocalizedMap("Able Description"),
+				"equals(firstName, \"John\")",
+				LocalizedMapUtil.getLocalizedMap("Able Description"),
 				LocalizedMapUtil.getLocalizedMap("Able Error Message"),
 				LocalizedMapUtil.getLocalizedMap("Able Label"), "Able",
 				ObjectActionExecutorConstants.KEY_WEBHOOK,
@@ -3260,7 +3272,8 @@ public class ObjectActionLocalServiceTest {
 
 		systemObjectAction = _objectActionLocalService.updateObjectAction(
 			externalReferenceCode2, systemObjectAction.getObjectActionId(),
-			false, "equals(firstName, \"João\")", LocalizedMapUtil.getLocalizedMap("Baker Description"),
+			false, "equals(firstName, \"João\")",
+			LocalizedMapUtil.getLocalizedMap("Baker Description"),
 			LocalizedMapUtil.getLocalizedMap("Baker Error Message"),
 			LocalizedMapUtil.getLocalizedMap("Baker Label"), "Baker",
 			ObjectActionExecutorConstants.KEY_GROOVY,
@@ -3272,7 +3285,8 @@ public class ObjectActionLocalServiceTest {
 			).build());
 
 		_assertObjectAction(
-			false, "equals(firstName, \"João\")", LocalizedMapUtil.getLocalizedMap("Baker Description"),
+			false, "equals(firstName, \"João\")",
+			LocalizedMapUtil.getLocalizedMap("Baker Description"),
 			LocalizedMapUtil.getLocalizedMap("Baker Error Message"),
 			LocalizedMapUtil.getLocalizedMap("Baker Label"), "Able",
 			systemObjectAction, ObjectActionExecutorConstants.KEY_GROOVY,
@@ -3293,7 +3307,8 @@ public class ObjectActionLocalServiceTest {
 		try {
 			systemObjectAction = _objectActionLocalService.updateObjectAction(
 				externalReferenceCode2, systemObjectAction.getObjectActionId(),
-				false, "equals(firstName, \"John\")", LocalizedMapUtil.getLocalizedMap("Charlie Description"),
+				false, "equals(firstName, \"John\")",
+				LocalizedMapUtil.getLocalizedMap("Charlie Description"),
 				LocalizedMapUtil.getLocalizedMap("Charlie Error Message"),
 				LocalizedMapUtil.getLocalizedMap("Charlie Label"), "Able",
 				ObjectActionExecutorConstants.KEY_WEBHOOK,
@@ -3309,7 +3324,8 @@ public class ObjectActionLocalServiceTest {
 		}
 
 		_assertObjectAction(
-			false, "equals(firstName, \"João\")", LocalizedMapUtil.getLocalizedMap("Baker Description"),
+			false, "equals(firstName, \"João\")",
+			LocalizedMapUtil.getLocalizedMap("Baker Description"),
 			LocalizedMapUtil.getLocalizedMap("Baker Error Message"),
 			LocalizedMapUtil.getLocalizedMap("Charlie Label"), "Able",
 			systemObjectAction, ObjectActionExecutorConstants.KEY_GROOVY,
@@ -3357,7 +3373,6 @@ public class ObjectActionLocalServiceTest {
 		Assert.assertEquals(
 			"Able Description", objectAction.getDescription(LocaleUtil.US));
 	}
-
 
 	@Rule
 	public TestName testName = new TestName();
@@ -3484,7 +3499,8 @@ public class ObjectActionLocalServiceTest {
 		return _objectActionLocalService.addObjectAction(
 			RandomTestUtil.randomString(), TestPropsValues.getUserId(),
 			_objectDefinition.getObjectDefinitionId(), true,
-			conditionExpression, LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
+			conditionExpression,
+			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			labelMap, name, objectActionExecutorKey, objectActionTriggerKey,
 			unicodeProperties, system);
@@ -3613,25 +3629,16 @@ public class ObjectActionLocalServiceTest {
 	}
 
 	private void _assertObjectAction(
-		boolean active, String name, ObjectAction objectAction) {
-
-		Assert.assertEquals(active, objectAction.isActive());
-		Assert.assertEquals(name, objectAction.getName());
-	}
-
-	private void _assertObjectAction(
 		boolean active, String conditionExpression,
-		Map<Locale, String> descriptionMap,
-		Map<Locale, String> errorMessageMap, Map<Locale, String> labelMap,
-		String name, ObjectAction objectAction, String objectActionExecutorKey,
-		String objectActionTriggerKey,
+		Map<Locale, String> descriptionMap, Map<Locale, String> errorMessageMap,
+		Map<Locale, String> labelMap, String name, ObjectAction objectAction,
+		String objectActionExecutorKey, String objectActionTriggerKey,
 		UnicodeProperties parametersUnicodeProperties, int status) {
 
 		Assert.assertEquals(active, objectAction.isActive());
 		Assert.assertEquals(
 			conditionExpression, objectAction.getConditionExpression());
-		Assert.assertEquals(
-			descriptionMap, objectAction.getDescriptionMap());
+		Assert.assertEquals(descriptionMap, objectAction.getDescriptionMap());
 		Assert.assertEquals(errorMessageMap, objectAction.getErrorMessageMap());
 		Assert.assertEquals(labelMap, objectAction.getLabelMap());
 		Assert.assertEquals(name, objectAction.getName());
@@ -3643,6 +3650,13 @@ public class ObjectActionLocalServiceTest {
 			parametersUnicodeProperties,
 			objectAction.getParametersUnicodeProperties());
 		Assert.assertEquals(status, objectAction.getStatus());
+	}
+
+	private void _assertObjectAction(
+		boolean active, String name, ObjectAction objectAction) {
+
+		Assert.assertEquals(active, objectAction.isActive());
+		Assert.assertEquals(name, objectAction.getName());
 	}
 
 	private void _assertObjectAction(
