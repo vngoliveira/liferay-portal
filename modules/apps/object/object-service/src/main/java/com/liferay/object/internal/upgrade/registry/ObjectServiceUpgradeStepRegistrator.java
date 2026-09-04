@@ -22,6 +22,7 @@ import com.liferay.object.internal.upgrade.v10_8_1.ObjectEntryAssetEntryTitleUpg
 import com.liferay.object.internal.upgrade.v10_9_0.util.ObjectEntryVersionTable;
 import com.liferay.object.internal.upgrade.v10_9_1.ClassNameUpgradeProcess;
 import com.liferay.object.internal.upgrade.v13_3_0.AttachmentObjectFieldDownloadPermissionUpgradeProcess;
+import com.liferay.object.internal.upgrade.v13_7_0.ObjectActionDescriptionUpgradeProcess;
 import com.liferay.object.internal.upgrade.v1_2_0.util.ObjectViewColumnTable;
 import com.liferay.object.internal.upgrade.v1_2_0.util.ObjectViewTable;
 import com.liferay.object.internal.upgrade.v2_1_0.ObjectFieldBusinessTypeUpgradeProcess;
@@ -752,6 +753,23 @@ public class ObjectServiceUpgradeStepRegistrator
 				}
 
 			});
+
+		registry.register(
+			"13.4.0", "13.5.0",
+			UpgradeProcessFactory.runSQL(
+				"delete from PLOEntry where key_ = 'model.resource.'"));
+
+		registry.register(
+			"13.5.0", "13.6.0",
+			UpgradeProcessFactory.addColumns(
+				"ObjectDefinition", "description STRING null"),
+			UpgradeProcessFactory.addColumns(
+				"ObjectField", "description STRING null"),
+			UpgradeProcessFactory.addColumns(
+				"ObjectRelationship", "description STRING null"));
+
+		registry.register(
+			"13.6.0", "13.7.0", new ObjectActionDescriptionUpgradeProcess());
 	}
 
 	@Reference

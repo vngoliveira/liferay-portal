@@ -4851,7 +4851,7 @@ public class ObjectEntryLocalServiceTest {
 			null, TestPropsValues.getUserId(),
 			_objectDefinition.getObjectDefinitionId(),
 			_draftObjectDefinition.getObjectDefinitionId(), 0,
-			ObjectRelationshipConstants.DELETION_TYPE_PREVENT, false,
+			ObjectRelationshipConstants.DELETION_TYPE_PREVENT, null, false,
 			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			StringUtil.randomId(), false,
 			ObjectRelationshipConstants.TYPE_ONE_TO_MANY, null);
@@ -4878,7 +4878,7 @@ public class ObjectEntryLocalServiceTest {
 			_objectDefinition.getDescriptionObjectFieldId(), 0,
 			_objectDefinition.getTitleObjectFieldId(),
 			_objectDefinition.isAccountEntryRestricted(), false,
-			_objectDefinition.getClassName(),
+			_objectDefinition.getClassName(), null,
 			_objectDefinition.isEnableCategorization(),
 			_objectDefinition.isEnableComments(),
 			_objectDefinition.isEnableFormContainer(),
@@ -4936,7 +4936,7 @@ public class ObjectEntryLocalServiceTest {
 			null, TestPropsValues.getUserId(),
 			publishedObjectDefinition.getObjectDefinitionId(),
 			draftObjectDefinition.getObjectDefinitionId(), 0,
-			ObjectRelationshipConstants.DELETION_TYPE_PREVENT, false,
+			ObjectRelationshipConstants.DELETION_TYPE_PREVENT, null, false,
 			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			StringUtil.randomId(), false,
 			ObjectRelationshipConstants.TYPE_ONE_TO_MANY, null);
@@ -9144,8 +9144,8 @@ public class ObjectEntryLocalServiceTest {
 			objectField.getExternalReferenceCode(), TestPropsValues.getUserId(),
 			objectField.getListTypeDefinitionId(),
 			objectField.getObjectDefinitionId(), objectField.getBusinessType(),
-			objectField.getDBType(), objectField.isIndexed(),
-			objectField.isIndexedAsKeyword(),
+			objectField.getDBType(), objectField.getDescriptionMap(),
+			objectField.isIndexed(), objectField.isIndexedAsKeyword(),
 			objectField.getIndexedLanguageId(), objectField.getLabelMap(),
 			objectField.isLocalized(), objectField.getName(),
 			objectField.getReadOnly(),
@@ -9181,7 +9181,7 @@ public class ObjectEntryLocalServiceTest {
 		return _objectActionLocalService.addObjectAction(
 			RandomTestUtil.randomString(), TestPropsValues.getUserId(),
 			objectDefinitionId, true, StringPool.BLANK,
-			RandomTestUtil.randomString(),
+			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			RandomTestUtil.randomString(), objectActionExecutorKey,
@@ -9384,7 +9384,8 @@ public class ObjectEntryLocalServiceTest {
 			objectField.getExternalReferenceCode(), TestPropsValues.getUserId(),
 			objectField.getListTypeDefinitionId(),
 			objectField.getObjectDefinitionId(), objectField.getBusinessType(),
-			null, null, objectField.getDBType(), objectField.isIndexed(),
+			null, null, objectField.getDBType(),
+			objectField.getDescriptionMap(), objectField.isIndexed(),
 			objectField.isIndexedAsKeyword(),
 			objectField.getIndexedLanguageId(), objectField.getLabelMap(),
 			objectField.isLocalized(), objectField.getName(),
@@ -9907,6 +9908,14 @@ public class ObjectEntryLocalServiceTest {
 		return serviceRegistration::unregister;
 	}
 
+	private ObjectEntry _rewindDisplayDate(ObjectEntry objectEntry) {
+		objectEntry.setDisplayDate(
+			new java.sql.Date(
+				System.currentTimeMillis() - TimeUnit.MINUTE.toMillis(1)));
+
+		return _objectEntryLocalService.updateObjectEntry(objectEntry);
+	}
+
 	private void _testAddObjectEntry(
 			String expectedValue, String fieldName,
 			ObjectDefinition objectDefinition, String value)
@@ -10367,8 +10376,7 @@ public class ObjectEntryLocalServiceTest {
 			HashMapBuilder.<String, Serializable>put(
 				"displayDate",
 				new java.sql.Date(
-					System.currentTimeMillis() +
-						TimeUnit.MILLISECOND.toMillis(1000))
+					System.currentTimeMillis() + TimeUnit.HOUR.toMillis(1))
 			).putAll(
 				requiredValues
 			).build(),
@@ -10385,7 +10393,7 @@ public class ObjectEntryLocalServiceTest {
 		Assert.assertEquals(
 			WorkflowConstants.STATUS_SCHEDULED, objectEntry3.getStatus());
 
-		Thread.sleep(1000);
+		objectEntry3 = _rewindDisplayDate(objectEntry3);
 
 		jobExecutorUnsafeRunnable.run();
 
@@ -10442,8 +10450,7 @@ public class ObjectEntryLocalServiceTest {
 			HashMapBuilder.<String, Serializable>put(
 				"displayDate",
 				new java.sql.Date(
-					System.currentTimeMillis() +
-						TimeUnit.MILLISECOND.toMillis(1000))
+					System.currentTimeMillis() + TimeUnit.HOUR.toMillis(1))
 			).putAll(
 				requiredValues
 			).build(),
@@ -10460,7 +10467,7 @@ public class ObjectEntryLocalServiceTest {
 		Assert.assertEquals(
 			WorkflowConstants.STATUS_DENIED, objectEntry5.getStatus());
 
-		Thread.sleep(1000);
+		objectEntry5 = _rewindDisplayDate(objectEntry5);
 
 		jobExecutorUnsafeRunnable.run();
 
