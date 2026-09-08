@@ -9,7 +9,6 @@ import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.captcha.rest.client.dto.v1_0.Captcha;
 import com.liferay.captcha.rest.client.http.HttpInvoker;
 import com.liferay.captcha.rest.client.resource.v1_0.CaptchaResource;
-import com.liferay.portal.kernel.encryptor.EncryptorUtil;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.model.Company;
@@ -20,6 +19,15 @@ import com.liferay.portal.kernel.util.Base64;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.test.rule.Inject;
+
+import java.nio.charset.StandardCharsets;
+
+import java.security.Key;
+
+import java.util.Arrays;
+
+import javax.crypto.Cipher;
+import javax.crypto.spec.GCMParameterSpec;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -55,7 +63,7 @@ public class CaptchaResourceTest extends BaseCaptchaResourceTestCase {
 		Assert.assertNotNull(captcha.getToken());
 
 		JSONObject jsonObject = JSONFactoryUtil.createJSONObject(
-			EncryptorUtil.decrypt(testCompany.getKeyObj(), captcha.getToken()));
+			_decryptToken(testCompany.getKeyObj(), captcha.getToken()));
 
 		Assert.assertNotNull(jsonObject.get("answer"));
 
@@ -88,7 +96,7 @@ public class CaptchaResourceTest extends BaseCaptchaResourceTestCase {
 		String token = _getToken();
 
 		JSONObject jsonObject = JSONFactoryUtil.createJSONObject(
-			EncryptorUtil.decrypt(testCompany.getKeyObj(), token));
+			_decryptToken(testCompany.getKeyObj(), token));
 
 		_assertStatus(token, jsonObject.getString("answer"), 204);
 
@@ -109,11 +117,36 @@ public class CaptchaResourceTest extends BaseCaptchaResourceTestCase {
 		Assert.assertEquals(statusCode, httpResponse.getStatusCode());
 	}
 
+	private String _decryptToken(Key key, String token) throws Exception {
+		byte[] encryptedBytes = Base64.decode(token);
+
+		byte[] cipherBytes = Arrays.copyOfRange(
+			encryptedBytes, _GCM_INITIALIZATION_VECTOR_LENGTH,
+			encryptedBytes.length);
+
+		byte[] initializationVector = Arrays.copyOfRange(
+			encryptedBytes, 0, _GCM_INITIALIZATION_VECTOR_LENGTH);
+
+		Cipher cipher = Cipher.getInstance(_AES_GCM_NOPADDING);
+
+		cipher.init(
+			Cipher.DECRYPT_MODE, key,
+			new GCMParameterSpec(_GCM_TAG_LENGTH_BITS, initializationVector));
+
+		return new String(cipher.doFinal(cipherBytes), StandardCharsets.UTF_8);
+	}
+
 	private String _getToken() throws Exception {
 		Captcha captcha = _captchaResource.getCaptchaChallenge();
 
 		return captcha.getToken();
 	}
+
+	private static final String _AES_GCM_NOPADDING = "AES/GCM/NoPadding";
+
+	private static final int _GCM_INITIALIZATION_VECTOR_LENGTH = 12;
+
+	private static final int _GCM_TAG_LENGTH_BITS = 128;
 
 	private CaptchaResource _captchaResource;
 

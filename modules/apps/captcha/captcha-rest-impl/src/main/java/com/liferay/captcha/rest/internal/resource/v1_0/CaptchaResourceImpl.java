@@ -13,10 +13,10 @@ import com.liferay.captcha.util.CaptchaUtil;
 import com.liferay.petra.string.StringUtil;
 import com.liferay.portal.configuration.module.configuration.ConfigurationProvider;
 import com.liferay.portal.kernel.captcha.CaptchaTextException;
-import com.liferay.portal.kernel.encryptor.EncryptorUtil;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.json.JSONUtil;
+import com.liferay.portal.kernel.security.SecureRandomUtil;
 import com.liferay.portal.kernel.util.Base64;
 import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.servlet.filters.secure.NonceUtil;
@@ -24,6 +24,16 @@ import com.liferay.portal.servlet.filters.secure.NonceUtil;
 import jakarta.ws.rs.ForbiddenException;
 
 import java.io.ByteArrayOutputStream;
+
+import java.nio.charset.StandardCharsets;
+
+import java.security.GeneralSecurityException;
+import java.security.Key;
+
+import java.util.Arrays;
+
+import javax.crypto.Cipher;
+import javax.crypto.spec.GCMParameterSpec;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -61,7 +71,7 @@ public class CaptchaResourceImpl extends BaseCaptchaResourceImpl {
 							return "data:image/png;base64," + data;
 						});
 					setToken(
-						() -> EncryptorUtil.encrypt(
+						() -> _encryptToken(
 							contextCompany.getKeyObj(),
 							JSONUtil.put(
 								"answer", expectedAnswer
@@ -83,9 +93,15 @@ public class CaptchaResourceImpl extends BaseCaptchaResourceImpl {
 	public void postCaptchaResponse(Captcha captcha) throws Exception {
 		_checkCaptchaConfiguration();
 
-		JSONObject jsonObject = _jsonFactory.createJSONObject(
-			EncryptorUtil.decrypt(
-				contextCompany.getKeyObj(), captcha.getToken()));
+		JSONObject jsonObject = null;
+
+		try {
+			jsonObject = _jsonFactory.createJSONObject(
+				_decryptToken(contextCompany.getKeyObj(), captcha.getToken()));
+		}
+		catch (Exception exception) {
+			throw new IllegalArgumentException(exception);
+		}
 
 		if (!jsonObject.has("answer") || !jsonObject.has("expiryTime") ||
 			!NonceUtil.verify(jsonObject.getString("nonce"))) {
@@ -119,6 +135,65 @@ public class CaptchaResourceImpl extends BaseCaptchaResourceImpl {
 				"Captcha engine is not configured to use SimpleCaptcha");
 		}
 	}
+
+	private String _decryptToken(Key key, String token)
+		throws GeneralSecurityException {
+
+		byte[] encryptedBytes = Base64.decode(token);
+
+		byte[] cipherBytes = Arrays.copyOfRange(
+			encryptedBytes, _GCM_INITIALIZATION_VECTOR_LENGTH,
+			encryptedBytes.length);
+
+		byte[] initializationVector = Arrays.copyOfRange(
+			encryptedBytes, 0, _GCM_INITIALIZATION_VECTOR_LENGTH);
+
+		Cipher cipher = Cipher.getInstance(_AES_GCM_NOPADDING);
+
+		cipher.init(
+			Cipher.DECRYPT_MODE, key,
+			new GCMParameterSpec(_GCM_TAG_LENGTH_BITS, initializationVector));
+
+		return new String(cipher.doFinal(cipherBytes), StandardCharsets.UTF_8);
+	}
+
+	private String _encryptToken(Key key, String plainText)
+		throws GeneralSecurityException {
+
+		byte[] initializationVector =
+			new byte[_GCM_INITIALIZATION_VECTOR_LENGTH];
+
+		for (int i = 0; i < initializationVector.length; i++) {
+			initializationVector[i] = SecureRandomUtil.nextByte();
+		}
+
+		Cipher cipher = Cipher.getInstance(_AES_GCM_NOPADDING);
+
+		cipher.init(
+			Cipher.ENCRYPT_MODE, key,
+			new GCMParameterSpec(_GCM_TAG_LENGTH_BITS, initializationVector));
+
+		byte[] cipherBytes = cipher.doFinal(
+			plainText.getBytes(StandardCharsets.UTF_8));
+
+		byte[] encryptedBytes =
+			new byte[initializationVector.length + cipherBytes.length];
+
+		System.arraycopy(
+			initializationVector, 0, encryptedBytes, 0,
+			initializationVector.length);
+		System.arraycopy(
+			cipherBytes, 0, encryptedBytes, initializationVector.length,
+			cipherBytes.length);
+
+		return Base64.encode(encryptedBytes);
+	}
+
+	private static final String _AES_GCM_NOPADDING = "AES/GCM/NoPadding";
+
+	private static final int _GCM_INITIALIZATION_VECTOR_LENGTH = 12;
+
+	private static final int _GCM_TAG_LENGTH_BITS = 128;
 
 	@Reference
 	private ConfigurationProvider _configurationProvider;
