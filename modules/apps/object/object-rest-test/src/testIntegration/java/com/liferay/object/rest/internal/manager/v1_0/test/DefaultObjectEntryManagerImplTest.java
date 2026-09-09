@@ -180,6 +180,7 @@ import com.liferay.portal.kernel.test.AssertUtils;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.TestInfo;
 import com.liferay.portal.kernel.test.constants.TestDataConstants;
+import com.liferay.portal.kernel.test.context.ContextUserReplace;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
@@ -862,7 +863,7 @@ public class DefaultObjectEntryManagerImplTest
 				null, adminUser.getUserId(),
 				_objectDefinition1.getObjectDefinitionId(),
 				_objectDefinition2.getObjectDefinitionId(), 0,
-				ObjectRelationshipConstants.DELETION_TYPE_CASCADE, false,
+				ObjectRelationshipConstants.DELETION_TYPE_CASCADE, null, false,
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 				"oneToManyRelationshipName", false,
 				ObjectRelationshipConstants.TYPE_ONE_TO_MANY, null);
@@ -898,8 +899,8 @@ public class DefaultObjectEntryManagerImplTest
 
 		_objectDefinition3 =
 			objectDefinitionLocalService.addCustomObjectDefinition(
-				null, adminUser.getUserId(), 0, null, true, false, true, false,
-				true, false, false, false, false, null,
+				null, adminUser.getUserId(), 0, null, null, true, false, true,
+				false, true, false, false, false, false, null,
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 				ObjectDefinitionTestUtil.getRandomName(), null, null,
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
@@ -936,7 +937,7 @@ public class DefaultObjectEntryManagerImplTest
 				null, adminUser.getUserId(),
 				accountEntryObjectDefinition.getObjectDefinitionId(),
 				_objectDefinition3.getObjectDefinitionId(), 0,
-				ObjectRelationshipConstants.DELETION_TYPE_CASCADE, false,
+				ObjectRelationshipConstants.DELETION_TYPE_CASCADE, null, false,
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 				"oneToManyRelationshipName1", false,
 				ObjectRelationshipConstants.TYPE_ONE_TO_MANY, null);
@@ -1097,7 +1098,8 @@ public class DefaultObjectEntryManagerImplTest
 					null, adminUser.getUserId(),
 					accountEntryObjectDefinition.getObjectDefinitionId(),
 					rootNode.getPrimaryKey(), 0,
-					ObjectRelationshipConstants.DELETION_TYPE_CASCADE, false,
+					ObjectRelationshipConstants.DELETION_TYPE_CASCADE, null,
+					false,
 					LocalizedMapUtil.getLocalizedMap(
 						RandomTestUtil.randomString()),
 					"oneToManyRelationshipName2", false,
@@ -2379,7 +2381,7 @@ public class DefaultObjectEntryManagerImplTest
 				null, adminUser.getUserId(),
 				_objectDefinition1.getObjectDefinitionId(),
 				_objectDefinition1.getObjectDefinitionId(), 0,
-				ObjectRelationshipConstants.DELETION_TYPE_CASCADE, false,
+				ObjectRelationshipConstants.DELETION_TYPE_CASCADE, null, false,
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 				StringUtil.randomId(), false,
 				ObjectRelationshipConstants.TYPE_MANY_TO_MANY, null);
@@ -2867,7 +2869,7 @@ public class DefaultObjectEntryManagerImplTest
 			null, adminUser.getUserId(),
 			parentObjectDefinition.getObjectDefinitionId(),
 			_objectDefinition1.getObjectDefinitionId(), 0,
-			ObjectRelationshipConstants.DELETION_TYPE_CASCADE, false,
+			ObjectRelationshipConstants.DELETION_TYPE_CASCADE, null, false,
 			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			objectRelationshipName, false,
 			ObjectRelationshipConstants.TYPE_ONE_TO_MANY, null);
@@ -2911,7 +2913,7 @@ public class DefaultObjectEntryManagerImplTest
 				null, adminUser.getUserId(),
 				parentObjectDefinition.getObjectDefinitionId(),
 				childObjectDefinition.getObjectDefinitionId(), 0,
-				ObjectRelationshipConstants.DELETION_TYPE_CASCADE, false,
+				ObjectRelationshipConstants.DELETION_TYPE_CASCADE, null, false,
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 				"a" + RandomTestUtil.randomString(), false,
 				ObjectRelationshipConstants.TYPE_ONE_TO_MANY, null);
@@ -3841,7 +3843,7 @@ public class DefaultObjectEntryManagerImplTest
 				null, TestPropsValues.getUserId(),
 				parentObjectDefinition.getObjectDefinitionId(),
 				childObjectDefinition.getObjectDefinitionId(), 0,
-				ObjectRelationshipConstants.DELETION_TYPE_CASCADE, true,
+				ObjectRelationshipConstants.DELETION_TYPE_CASCADE, null, true,
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 				StringUtil.randomId(), false,
 				ObjectRelationshipConstants.TYPE_ONE_TO_MANY, null);
@@ -3890,7 +3892,7 @@ public class DefaultObjectEntryManagerImplTest
 				objectRelationship.getExternalReferenceCode(),
 				objectRelationship.getObjectRelationshipId(),
 				objectRelationship.getParameterObjectFieldId(),
-				objectRelationship.getDeletionType(), false,
+				objectRelationship.getDeletionType(), null, false,
 				objectRelationship.getLabelMap(), null);
 
 		_objectRelationshipLocalService.deleteObjectRelationship(
@@ -4170,7 +4172,7 @@ public class DefaultObjectEntryManagerImplTest
 				null, adminUser.getUserId(),
 				objectDefinition1.getObjectDefinitionId(),
 				objectDefinition2.getObjectDefinitionId(), 0,
-				ObjectRelationshipConstants.DELETION_TYPE_CASCADE, false,
+				ObjectRelationshipConstants.DELETION_TYPE_CASCADE, null, false,
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 				"oneToManyRelationship", false,
 				ObjectRelationshipConstants.TYPE_ONE_TO_MANY, null);
@@ -4209,8 +4211,8 @@ public class DefaultObjectEntryManagerImplTest
 			_objectRelationshipLocalService.updateObjectRelationship(
 				objectRelationship.getExternalReferenceCode(),
 				objectRelationship.getObjectRelationshipId(), 0,
-				ObjectRelationshipConstants.DELETION_TYPE_DISASSOCIATE, false,
-				objectRelationship.getLabelMap(), null);
+				ObjectRelationshipConstants.DELETION_TYPE_DISASSOCIATE, null,
+				false, objectRelationship.getLabelMap(), null);
 
 		_defaultObjectEntryManager.deleteObjectEntry(
 			companyId, _simpleDTOConverterContext, "externalReferenceCode1",
@@ -4245,7 +4247,7 @@ public class DefaultObjectEntryManagerImplTest
 			_objectRelationshipLocalService.updateObjectRelationship(
 				objectRelationship.getExternalReferenceCode(),
 				objectRelationship.getObjectRelationshipId(), 0,
-				ObjectRelationshipConstants.DELETION_TYPE_PREVENT, false,
+				ObjectRelationshipConstants.DELETION_TYPE_PREVENT, null, false,
 				objectRelationship.getLabelMap(), null);
 
 		AssertUtils.assertFailure(
@@ -6946,6 +6948,57 @@ public class DefaultObjectEntryManagerImplTest
 	}
 
 	@Test
+	public void testGetObjectEntry() throws Exception {
+
+		// Company scope
+
+		ObjectEntry objectEntry = _addObjectEntry(
+			_objectDefinition1, WorkflowConstants.STATUS_APPROVED);
+
+		_assertObjectEntry(
+			objectEntry,
+			_defaultObjectEntryManager.getObjectEntry(
+				dtoConverterContext, _objectDefinition1,
+				_objectEntryLocalService.getObjectEntry(objectEntry.getId())));
+
+		// Site scope
+
+		ObjectEntry siteObjectEntry = _defaultObjectEntryManager.addObjectEntry(
+			_simpleDTOConverterContext, _objectDefinition4,
+			new ObjectEntry() {
+				{
+					properties = HashMapBuilder.<String, Object>put(
+						"textObjectFieldName", RandomTestUtil.randomString()
+					).build();
+				}
+			},
+			_group.getGroupKey());
+
+		com.liferay.object.model.ObjectEntry serviceBuilderObjectEntry =
+			_objectEntryLocalService.getObjectEntry(siteObjectEntry.getId());
+
+		_assertObjectEntry(
+			siteObjectEntry,
+			_defaultObjectEntryManager.getObjectEntry(
+				dtoConverterContext, _objectDefinition4,
+				serviceBuilderObjectEntry));
+
+		// Without view permission
+
+		_user = _addUser();
+
+		AssertUtils.assertFailure(
+			PrincipalException.MustHavePermission.class,
+			StringBundler.concat(
+				"User ", _user.getUserId(), " must have VIEW permission for ",
+				_objectDefinition4.getClassName(), StringPool.SPACE,
+				siteObjectEntry.getId()),
+			() -> _defaultObjectEntryManager.getObjectEntry(
+				dtoConverterContext, _objectDefinition4,
+				serviceBuilderObjectEntry));
+	}
+
+	@Test
 	public void testGetObjectEntryByVersion() throws Exception {
 
 		// Company scope
@@ -7105,6 +7158,52 @@ public class DefaultObjectEntryManagerImplTest
 	}
 
 	@Test
+	public void testGetObjectEntryWithDifferentUser() throws Exception {
+		_enableObjectEntryVersioning();
+
+		ObjectEntry objectEntry = _addObjectEntry(
+			_objectDefinition1,
+			ObjectEntryFolderConstants.PARENT_OBJECT_ENTRY_FOLDER_ID_DEFAULT,
+			null, 1);
+
+		User user = UserTestUtil.addOmniadminUser();
+
+		try (ContextUserReplace contextUserReplace = new ContextUserReplace(
+				user)) {
+
+			objectEntry = _defaultObjectEntryManager.updateObjectEntry(
+				TestPropsValues.getCompanyId(),
+				_createDTOConverterContext(user),
+				objectEntry.getExternalReferenceCode(), _objectDefinition1,
+				new ObjectEntry() {
+					{
+						properties = HashMapBuilder.<String, Object>put(
+							"textObjectFieldName", RandomTestUtil.randomString()
+						).build();
+						systemProperties = new SystemProperties() {
+							{
+								version = new Version() {
+									{
+										number = 2;
+									}
+								};
+							}
+						};
+					}
+				},
+				objectEntry.getScopeKey());
+		}
+
+		objectEntry = _defaultObjectEntryManager.getObjectEntry(
+			dtoConverterContext, _objectDefinition1, objectEntry.getId());
+
+		Creator creator = objectEntry.getCreator();
+
+		Assert.assertEquals(Long.valueOf(user.getUserId()), creator.getId());
+		Assert.assertEquals(user.getFullName(), creator.getName());
+	}
+
+	@Test
 	public void testGetRelatedObjectEntries() throws Exception {
 		_testGetRelatedObjectEntries(
 			_companyObjectEntryA, _companyObjectRelationshipA_AA, null,
@@ -7145,7 +7244,7 @@ public class DefaultObjectEntryManagerImplTest
 				null, adminUser.getUserId(),
 				_objectDefinition3.getObjectDefinitionId(),
 				childObjectDefinition.getObjectDefinitionId(), 0,
-				ObjectRelationshipConstants.DELETION_TYPE_CASCADE, false,
+				ObjectRelationshipConstants.DELETION_TYPE_CASCADE, null, false,
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 				StringUtil.randomId(), false,
 				ObjectRelationshipConstants.TYPE_ONE_TO_MANY, null);
@@ -7159,7 +7258,7 @@ public class DefaultObjectEntryManagerImplTest
 				null, adminUser.getUserId(),
 				accountEntryObjectDefinition.getObjectDefinitionId(),
 				childObjectDefinition.getObjectDefinitionId(), 0,
-				ObjectRelationshipConstants.DELETION_TYPE_CASCADE, false,
+				ObjectRelationshipConstants.DELETION_TYPE_CASCADE, null, false,
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 				StringUtil.randomId(), false,
 				ObjectRelationshipConstants.TYPE_ONE_TO_MANY, null);
@@ -7311,7 +7410,7 @@ public class DefaultObjectEntryManagerImplTest
 				null, adminUser.getUserId(),
 				_objectDefinition3.getObjectDefinitionId(),
 				childObjectDefinition.getObjectDefinitionId(), 0,
-				ObjectRelationshipConstants.DELETION_TYPE_CASCADE, false,
+				ObjectRelationshipConstants.DELETION_TYPE_CASCADE, null, false,
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 				StringUtil.randomId(), false,
 				ObjectRelationshipConstants.TYPE_MANY_TO_MANY, null);
@@ -7449,7 +7548,7 @@ public class DefaultObjectEntryManagerImplTest
 				null, adminUser.getUserId(),
 				cpDefinitionObjectDefinition.getObjectDefinitionId(),
 				childObjectDefinition.getObjectDefinitionId(), 0,
-				ObjectRelationshipConstants.DELETION_TYPE_CASCADE, false,
+				ObjectRelationshipConstants.DELETION_TYPE_CASCADE, null, false,
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 				StringUtil.randomId(), false,
 				ObjectRelationshipConstants.TYPE_ONE_TO_MANY, null);
@@ -7541,6 +7640,50 @@ public class DefaultObjectEntryManagerImplTest
 					_simpleDTOConverterContext,
 					objectEntry2.getExternalReferenceCode(), objectRelationship,
 					objectEntry1.getExternalReferenceCode(), null));
+	}
+
+	@Test
+	public void testGetServiceBuilderObjectEntries() throws Exception {
+		ObjectEntry objectEntry1 = _addObjectEntry(
+			_objectDefinition1, WorkflowConstants.STATUS_APPROVED);
+		ObjectEntry objectEntry2 = _addObjectEntry(
+			_objectDefinition1, WorkflowConstants.STATUS_APPROVED);
+
+		Page<com.liferay.object.model.ObjectEntry> page =
+			_defaultObjectEntryManager.getServiceBuilderObjectEntries(
+				TestPropsValues.getCompanyId(), _objectDefinition1, null,
+				dtoConverterContext, null, Pagination.of(1, 20), null, null);
+
+		Assert.assertEquals(2, page.getTotalCount());
+
+		List<com.liferay.object.model.ObjectEntry> serviceBuilderObjectEntries =
+			new ArrayList<>(page.getItems());
+
+		Assert.assertEquals(
+			serviceBuilderObjectEntries.toString(), 2,
+			serviceBuilderObjectEntries.size());
+
+		com.liferay.object.model.ObjectEntry serviceBuilderObjectEntry1 =
+			serviceBuilderObjectEntries.get(0);
+
+		Assert.assertEquals(
+			objectEntry1.getId(),
+			Long.valueOf(serviceBuilderObjectEntry1.getObjectEntryId()));
+		Assert.assertEquals(
+			_objectEntryLocalService.getValues(
+				serviceBuilderObjectEntry1.getObjectEntryId()),
+			serviceBuilderObjectEntry1.getValues());
+
+		com.liferay.object.model.ObjectEntry serviceBuilderObjectEntry2 =
+			serviceBuilderObjectEntries.get(1);
+
+		Assert.assertEquals(
+			objectEntry2.getId(),
+			Long.valueOf(serviceBuilderObjectEntry2.getObjectEntryId()));
+		Assert.assertEquals(
+			_objectEntryLocalService.getValues(
+				serviceBuilderObjectEntry2.getObjectEntryId()),
+			serviceBuilderObjectEntry2.getValues());
 	}
 
 	@Test
@@ -9987,7 +10130,7 @@ public class DefaultObjectEntryManagerImplTest
 				null, adminUser.getUserId(),
 				accountEntryObjectDefinition.getObjectDefinitionId(),
 				objectDefinition.getObjectDefinitionId(), 0,
-				ObjectRelationshipConstants.DELETION_TYPE_CASCADE, false,
+				ObjectRelationshipConstants.DELETION_TYPE_CASCADE, null, false,
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 				"oneToManyRelationship", false,
 				ObjectRelationshipConstants.TYPE_ONE_TO_MANY, null);
@@ -10028,7 +10171,7 @@ public class DefaultObjectEntryManagerImplTest
 				null, adminUser.getUserId(),
 				_objectDefinition3.getObjectDefinitionId(),
 				objectDefinition.getObjectDefinitionId(), 0,
-				ObjectRelationshipConstants.DELETION_TYPE_CASCADE, false,
+				ObjectRelationshipConstants.DELETION_TYPE_CASCADE, null, false,
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 				StringUtil.randomId(), false,
 				ObjectRelationshipConstants.TYPE_ONE_TO_MANY, null);
@@ -10699,8 +10842,9 @@ public class DefaultObjectEntryManagerImplTest
 
 		ObjectDefinition objectDefinition =
 			objectDefinitionLocalService.addCustomObjectDefinition(
-				null, adminUser.getUserId(), 0, null, true, false, true, false,
-				true, false, false, enableObjectEntrySubscription, false, null,
+				null, adminUser.getUserId(), 0, null, null, true, false, true,
+				false, true, false, false, enableObjectEntrySubscription, false,
+				null,
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 				ObjectDefinitionTestUtil.getRandomName(), null, null,
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
@@ -10831,8 +10975,8 @@ public class DefaultObjectEntryManagerImplTest
 			objectField.getExternalReferenceCode(),
 			objectField.getListTypeDefinitionId(),
 			objectField.getObjectDefinitionId(), objectField.getBusinessType(),
-			objectField.getDBType(), objectField.isIndexed(),
-			objectField.isIndexedAsKeyword(),
+			objectField.getDBType(), objectField.getDescriptionMap(),
+			objectField.isIndexed(), objectField.isIndexedAsKeyword(),
 			objectField.getIndexedLanguageId(), objectField.getLabelMap(),
 			objectField.isLocalized(), objectField.getName(),
 			objectField.getReadOnly(),
@@ -12696,9 +12840,10 @@ public class DefaultObjectEntryManagerImplTest
 				null, adminUser.getUserId(),
 				parentObjectDefinition.getObjectDefinitionId(),
 				childObjectDefinition.getObjectDefinitionId(), 0,
-				ObjectRelationshipConstants.DELETION_TYPE_DISASSOCIATE, false,
-				RandomTestUtil.randomLocaleStringMap(), StringUtil.randomId(),
-				false, ObjectRelationshipConstants.TYPE_MANY_TO_MANY, null);
+				ObjectRelationshipConstants.DELETION_TYPE_DISASSOCIATE, null,
+				false, RandomTestUtil.randomLocaleStringMap(),
+				StringUtil.randomId(), false,
+				ObjectRelationshipConstants.TYPE_MANY_TO_MANY, null);
 
 		ObjectEntry parentObjectEntry =
 			_defaultObjectEntryManager.addObjectEntry(
@@ -12777,7 +12922,7 @@ public class DefaultObjectEntryManagerImplTest
 				null, adminUser.getUserId(),
 				parentObjectDefinition.getObjectDefinitionId(),
 				childObjectDefinition.getObjectDefinitionId(), 0,
-				ObjectRelationshipConstants.DELETION_TYPE_CASCADE, true,
+				ObjectRelationshipConstants.DELETION_TYPE_CASCADE, null, true,
 				RandomTestUtil.randomLocaleStringMap(), StringUtil.randomId(),
 				false, ObjectRelationshipConstants.TYPE_ONE_TO_MANY, null);
 
@@ -12854,7 +12999,7 @@ public class DefaultObjectEntryManagerImplTest
 			_objectRelationshipLocalService.updateObjectRelationship(
 				oneToManyObjectRelationship.getExternalReferenceCode(),
 				oneToManyObjectRelationship.getObjectRelationshipId(), 0,
-				oneToManyObjectRelationship.getDeletionType(), false,
+				oneToManyObjectRelationship.getDeletionType(), null, false,
 				oneToManyObjectRelationship.getLabelMap(), null);
 
 		copiedParentObjectEntry = _defaultObjectEntryManager.copyObjectEntry(

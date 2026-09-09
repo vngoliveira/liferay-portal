@@ -8,6 +8,7 @@ package com.liferay.headless.cmp.resource.v1_0.test;
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.headless.cmp.client.dto.v1_0.TaskStatistics;
 import com.liferay.headless.cmp.client.resource.v1_0.TaskStatisticsResource;
+import com.liferay.headless.cmp.resource.v1_0.test.util.CMPLicenseTestUtil;
 import com.liferay.object.model.ObjectEntry;
 import com.liferay.object.service.ObjectEntryLocalService;
 import com.liferay.portal.kernel.model.User;
@@ -19,8 +20,6 @@ import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
-import com.liferay.portal.test.rule.FeatureFlag;
-import com.liferay.portal.test.rule.FeatureFlags;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
@@ -39,7 +38,6 @@ import org.junit.runner.RunWith;
 /**
  * @author Carolina Barbosa
  */
-@FeatureFlags(featureFlags = @FeatureFlag("LPD-58677"))
 @RunWith(Arquillian.class)
 public class TaskStatisticsResourceTest
 	extends BaseTaskStatisticsResourceTestCase {
@@ -112,6 +110,7 @@ public class TaskStatisticsResourceTest
 		Assert.assertEquals(
 			1, GetterUtil.getLong(taskStatistics2.getTotalCount()));
 
+		_testGetProjectTaskStatisticsWithAppDisabled();
 		_testGetProjectTaskStatisticsWithoutViewPermission();
 	}
 
@@ -129,6 +128,8 @@ public class TaskStatisticsResourceTest
 			1, GetterUtil.getLong(taskStatistics.getOverdueCount()));
 		Assert.assertEquals(
 			3, GetterUtil.getLong(taskStatistics.getTotalCount()));
+
+		_testGetTaskStatisticsWithAppDisabled();
 	}
 
 	@Override
@@ -156,6 +157,24 @@ public class TaskStatisticsResourceTest
 			ServiceContextTestUtil.getServiceContext());
 	}
 
+	private void _testGetProjectTaskStatisticsWithAppDisabled()
+		throws Exception {
+
+		try (AutoCloseable autoCloseable =
+				CMPLicenseTestUtil.withAppDisabled()) {
+
+			assertHttpResponseStatusCode(
+				400,
+				taskStatisticsResource.getProjectTaskStatisticsHttpResponse(
+					_cmpProjectObjectEntry1.getObjectEntryId()));
+		}
+
+		assertHttpResponseStatusCode(
+			200,
+			taskStatisticsResource.getProjectTaskStatisticsHttpResponse(
+				_cmpProjectObjectEntry1.getObjectEntryId()));
+	}
+
 	private void _testGetProjectTaskStatisticsWithoutViewPermission()
 		throws Exception {
 
@@ -178,6 +197,18 @@ public class TaskStatisticsResourceTest
 			404,
 			userTaskStatisticsResource.getProjectTaskStatisticsHttpResponse(
 				_cmpProjectObjectEntry1.getObjectEntryId()));
+	}
+
+	private void _testGetTaskStatisticsWithAppDisabled() throws Exception {
+		try (AutoCloseable autoCloseable =
+				CMPLicenseTestUtil.withAppDisabled()) {
+
+			assertHttpResponseStatusCode(
+				400, taskStatisticsResource.getTaskStatisticsHttpResponse());
+		}
+
+		assertHttpResponseStatusCode(
+			200, taskStatisticsResource.getTaskStatisticsHttpResponse());
 	}
 
 	private ObjectEntry _cmpProjectObjectEntry1;

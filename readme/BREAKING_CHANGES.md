@@ -1906,3 +1906,70 @@ When reading the field, treat the value as an array of `ListEntry` objects and r
 ### Why was this change made?
 
 The field holds multiple values, so a single comma-separated string could not be parsed unambiguously and did not match the representation used for the same field on the object entry APIs. Exposing it as an array of `ListEntry` objects makes the value self-describing and consistent across the headless APIs.
+
+---------------------------------------
+
+## Removed the System Settings triggers for virtual instance copy, export, and import
+- **Date:** 2026-Aug-26
+- **JIRA Ticket:** [LPD-92622](https://liferay.atlassian.net/browse/LPD-92622)
+
+### What changed?
+
+The `Instance Copy`, `Instance Export`, and `Instance Import` entries were removed from System Settings, along with the `Virtual Instances` category that held them. The three configuration interfaces behind those entries, `CopyPortalInstanceConfiguration`, `ExportPortalInstanceConfiguration`, and `ImportPortalInstanceConfiguration`, were deleted, as were the components that performed the operation when a configuration was saved. Saving a configuration no longer triggers a copy, export, or import.
+
+### Who is affected?
+
+This affects anyone who triggered one of these operations by saving the corresponding System Settings entry, or by deploying a configuration file for one of the three PIDs to `osgi/configs`, such as `com.liferay.portal.instances.internal.configuration.ExportPortalInstanceConfiguration.config`.
+
+### How should I update my code?
+
+Use the Portal Instances headless API:
+
+- `POST /o/headless-portal-instances/v1.0/portal-instances/{portalInstanceId}/copy`
+- `POST /o/headless-portal-instances/v1.0/portal-instances/{portalInstanceId}/export`
+- `POST /o/headless-portal-instances/v1.0/portal-instances/import`
+
+Copy and export can also be triggered from the Virtual Instances page in the Control Panel. Every endpoint requires an authenticated omniadmin, whereas deploying a configuration file required no credentials, so provisioning scripts that ran before an administrator existed must now authenticate.
+
+### Why was this change made?
+
+A configuration entry is a poor trigger for a one shot operation. It returns nothing to the caller, and the only record that the operation succeeded was an `INFO` log line. The headless API returns the outcome instead, including the name of the schema an export produced, and it is permission checked.
+
+---------------------------------------
+
+## Removed the Superseded Applications Panel Categories
+- **Date:** 2026-Sep-07
+- **JIRA Ticket:** [LPD-100257](https://liferay.atlassian.net/browse/LPD-100257)
+
+### What changed?
+
+The Applications Panel reorganization emptied ten groups, and they are now removed: Batch Planner, Commerce, Communication, Content, Custom Apps, Design, Personalization, Publications, Search Experiences, and Search Tuning. Their constants are gone from `PanelCategoryKeys`, `SXPPanelCategoryKeys` and `SearchTuningPanelCategoryKeys` are deleted outright, and the `portal-search-tuning-web` and `portal-search-tuning-web-api` modules go with them.
+
+### Who is affected?
+
+Administrators with a custom object in one of the ten groups. The object **moved**, it was not deleted: it is under Control Panel > Objects.
+
+Developers whose module or client extension names a removed constant or its literal key value. A module that is never rebuilt keeps a key that names nothing, and its application stays out of the menu until it is recompiled.
+
+### How should I update my code?
+
+Point each removed key at the group its applications moved to:
+
+| Removed Key | Replacement |
+| --- | --- |
+| `APPLICATIONS_MENU_APPLICATIONS_BATCH_PLANNER` | `APPLICATIONS_MENU_APPLICATIONS_DEVELOPER_INTEGRATION` |
+| `APPLICATIONS_MENU_APPLICATIONS_CUSTOM_APPS` | `APPLICATIONS_MENU_APPLICATIONS_DEVELOPER_INTEGRATION` |
+| `APPLICATIONS_MENU_APPLICATIONS_CONTENT` | `APPLICATIONS_MENU_APPLICATIONS_IN_MAINTENANCE` |
+| `APPLICATIONS_MENU_APPLICATIONS_PUBLICATIONS` | `APPLICATIONS_MENU_APPLICATIONS_IN_MAINTENANCE` |
+| `APPLICATIONS_MENU_APPLICATIONS_COMMERCE` | `APPLICATIONS_MENU_APPLICATIONS` |
+| `APPLICATIONS_MENU_APPLICATIONS_COMMUNICATION` | `APPLICATIONS_MENU_APPLICATIONS` |
+| `APPLICATIONS_MENU_APPLICATIONS_DESIGN` | `APPLICATIONS_MENU_APPLICATIONS` |
+| `APPLICATIONS_MENU_APPLICATIONS_PERSONALIZATION` | `APPLICATIONS_MENU_APPLICATIONS` |
+| `SXPPanelCategoryKeys.CONTROL_PANEL_SEARCH_EXPERIENCES` | `SearchPanelCategoryKeys.CONTROL_PANEL_SEARCH` |
+| `SearchTuningPanelCategoryKeys.CONTROL_PANEL_SEARCH_TUNING` | `SearchPanelCategoryKeys.CONTROL_PANEL_SEARCH` |
+
+In a JSON object definition payload, the `panelCategoryKey` that points to a deleted category key should be rewritten to `control_panel.object`.
+
+### Why was this change made?
+
+The Applications Panel has been reorganized by feature area, rather than by arbitrary splits and groups containing a single application. Panel Category groups left empty by this change have been removed and are no longer available as destinations for OSGi applications or object definitions.
