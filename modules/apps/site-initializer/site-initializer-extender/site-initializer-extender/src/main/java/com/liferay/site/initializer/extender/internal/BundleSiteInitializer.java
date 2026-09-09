@@ -3379,7 +3379,7 @@ public class BundleSiteInitializer implements SiteInitializer {
 				jsonObject.getLong("objectDefinitionId"),
 				jsonObject.getBoolean("active"),
 				jsonObject.getString("conditionExpression"),
-				jsonObject.getString("description"),
+				SiteInitializerUtil.toMap(jsonObject.getString("description")),
 				SiteInitializerUtil.toMap(jsonObject.getString("errorMessage")),
 				SiteInitializerUtil.toMap(jsonObject.getString("label")),
 				jsonObject.getString("name"),
@@ -3450,7 +3450,8 @@ public class BundleSiteInitializer implements SiteInitializer {
 					jsonObject.getLong("objectDefinitionId"),
 					objectActionJSONObject.getBoolean("active"),
 					objectActionJSONObject.getString("conditionExpression"),
-					objectActionJSONObject.getString("description"),
+					SiteInitializerUtil.toMap(
+						objectActionJSONObject.getString("description")),
 					SiteInitializerUtil.toMap(
 						objectActionJSONObject.getString("errorMessage")),
 					SiteInitializerUtil.toMap(
@@ -4473,26 +4474,40 @@ public class BundleSiteInitializer implements SiteInitializer {
 				continue;
 			}
 
-			Page<TaxonomyVocabulary> taxonomyVocabularyPage =
-				taxonomyVocabularyResource.getSiteTaxonomyVocabulariesPage(
-					groupId, "", null,
-					taxonomyVocabularyResource.toFilter(
-						StringBundler.concat(
-							"name eq '", taxonomyVocabulary.getName(), "'")),
-					null, null);
+			if (Validator.isNotNull(
+					taxonomyVocabulary.getExternalReferenceCode())) {
 
-			TaxonomyVocabulary existingTaxonomyVocabulary =
-				taxonomyVocabularyPage.fetchFirstItem();
-
-			if (existingTaxonomyVocabulary == null) {
 				taxonomyVocabulary =
-					taxonomyVocabularyResource.postSiteTaxonomyVocabulary(
-						groupId, taxonomyVocabulary);
+					taxonomyVocabularyResource.
+						putSiteTaxonomyVocabularyByExternalReferenceCode(
+							groupId,
+							taxonomyVocabulary.getExternalReferenceCode(),
+							taxonomyVocabulary);
 			}
 			else {
-				taxonomyVocabulary =
-					taxonomyVocabularyResource.patchTaxonomyVocabulary(
-						existingTaxonomyVocabulary.getId(), taxonomyVocabulary);
+				Page<TaxonomyVocabulary> taxonomyVocabularyPage =
+					taxonomyVocabularyResource.getSiteTaxonomyVocabulariesPage(
+						groupId, "", null,
+						taxonomyVocabularyResource.toFilter(
+							StringBundler.concat(
+								"name eq '", taxonomyVocabulary.getName(),
+								"'")),
+						null, null);
+
+				TaxonomyVocabulary existingTaxonomyVocabulary =
+					taxonomyVocabularyPage.fetchFirstItem();
+
+				if (existingTaxonomyVocabulary == null) {
+					taxonomyVocabulary =
+						taxonomyVocabularyResource.postSiteTaxonomyVocabulary(
+							groupId, taxonomyVocabulary);
+				}
+				else {
+					taxonomyVocabulary =
+						taxonomyVocabularyResource.patchTaxonomyVocabulary(
+							existingTaxonomyVocabulary.getId(),
+							taxonomyVocabulary);
+				}
 			}
 
 			stringUtilReplaceValues.put(
@@ -4540,6 +4555,13 @@ public class BundleSiteInitializer implements SiteInitializer {
 			taxonomyCategoryResourceBuilder.user(
 				serviceContext.fetchUser()
 			).build();
+
+		if (Validator.isNotNull(taxonomyCategory.getExternalReferenceCode())) {
+			return taxonomyCategoryResource.
+				putTaxonomyVocabularyTaxonomyCategoryByExternalReferenceCode(
+					vocabularyId, taxonomyCategory.getExternalReferenceCode(),
+					taxonomyCategory);
+		}
 
 		Page<TaxonomyCategory> taxonomyCategoryPage =
 			taxonomyCategoryResource.
@@ -5575,15 +5597,17 @@ public class BundleSiteInitializer implements SiteInitializer {
 		).put(
 			addLayoutPageTemplatesR,
 			_dependsOn(
-				addOrUpdateBlogPostingsR, addCPDefinitionsR,
-				addOrUpdateClientExtensionEntriesR, addFragmentEntriesR,
-				addOrUpdateJournalArticlesR, addOrUpdateSXPBlueprintR)
+				addObjectDefinitionsR, addOrUpdateBlogPostingsR,
+				addCPDefinitionsR, addOrUpdateClientExtensionEntriesR,
+				addFragmentEntriesR, addOrUpdateJournalArticlesR,
+				addOrUpdateSXPBlueprintR)
 		).put(
 			addLayoutUtilityPageEntriesR,
 			_dependsOn(
-				addOrUpdateBlogPostingsR, addCPDefinitionsR,
-				addOrUpdateClientExtensionEntriesR, addFragmentEntriesR,
-				addOrUpdateJournalArticlesR, addOrUpdateSXPBlueprintR)
+				addObjectDefinitionsR, addOrUpdateBlogPostingsR,
+				addCPDefinitionsR, addOrUpdateClientExtensionEntriesR,
+				addFragmentEntriesR, addOrUpdateJournalArticlesR,
+				addOrUpdateSXPBlueprintR)
 		).put(
 			addObjectDefinitionsR,
 			_dependsOn(

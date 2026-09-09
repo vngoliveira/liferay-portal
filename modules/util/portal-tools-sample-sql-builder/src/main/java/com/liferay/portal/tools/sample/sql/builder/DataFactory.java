@@ -1260,8 +1260,14 @@ public class DataFactory {
 	public AssetEntryModel newAssetEntryModel(
 		ObjectEntryModel objectEntryModel) {
 
+		long groupId = objectEntryModel.getGroupId();
+
+		if (groupId == 0) {
+			groupId = _globalGroupId;
+		}
+
 		return newAssetEntryModel(
-			objectEntryModel.getGroupId(), objectEntryModel.getCreateDate(),
+			groupId, objectEntryModel.getCreateDate(),
 			objectEntryModel.getModifiedDate(),
 			getClassNameId(
 				ObjectDefinitionConstants.
@@ -5757,7 +5763,7 @@ public class DataFactory {
 			objectDefinitionId, objectFolderId, 0, className,
 			StringBundler.concat("O_", _companyId, StringPool.UNDERLINE, name),
 			true, false, true, label, true, name,
-			PanelCategoryKeys.APPLICATIONS_MENU_APPLICATIONS_CUSTOM_APPS,
+			PanelCategoryKeys.CONTROL_PANEL_OBJECT,
 			"c_" + StringUtil.toLowerCase(name) + "_",
 			"c_" + StringUtil.toLowerCase(name), label, true, false, uuid,
 			uuid);
@@ -8519,6 +8525,7 @@ public class DataFactory {
 		objectEntryModel.setHeadObjectEntryId(
 			objectEntryModel.getObjectEntryId());
 		objectEntryModel.setObjectDefinitionId(objectDefinitionId);
+		objectEntryModel.setDefaultLanguageId("en_US");
 		objectEntryModel.setStatus(WorkflowConstants.STATUS_APPROVED);
 		objectEntryModel.setStatusByUserId(_sampleUserId);
 		objectEntryModel.setStatusByUserName(_SAMPLE_USER_NAME);

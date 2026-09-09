@@ -27,9 +27,9 @@
 		<column name="objectDefinitionId" type="long" />
 		<column name="active" type="boolean" />
 		<column name="conditionExpression" type="String" />
-		<column name="description" type="String" />
 		<column localized="true" name="errorMessage" type="String" />
 		<column localized="true" name="label" type="String" />
+		<column localized="true" name="description" type="String" />
 		<column name="name" type="String" />
 		<column name="objectActionExecutorKey" type="String" />
 		<column name="objectActionTriggerKey" type="String" />
@@ -108,6 +108,7 @@
 		<column name="enableObjectEntryVersioning" type="boolean" />
 		<column name="friendlyURLSeparator" type="String" />
 		<column localized="true" name="label" type="String" />
+		<column localized="true" name="description" type="String" />
 		<column name="modifiable" type="boolean" />
 		<column name="name" type="String" />
 		<column name="panelAppOrder" type="String" />
@@ -313,6 +314,11 @@
 			<finder-column name="objectDefinitionId" />
 			<finder-column name="status" />
 		</finder>
+		<finder name="G_ODI_NotS" return-type="Collection" where="objectEntryId = headObjectEntryId">
+			<finder-column name="groupId" />
+			<finder-column name="objectDefinitionId" />
+			<finder-column comparator="!=" name="status" />
+		</finder>
 		<finder name="U_GtCD_ODI" return-type="Collection" where="objectEntryId = headObjectEntryId">
 			<finder-column name="userId" />
 			<finder-column comparator="&gt;" name="createDate" />
@@ -460,6 +466,7 @@
 		<column name="indexedAsKeyword" type="boolean" />
 		<column name="indexedLanguageId" type="String" />
 		<column localized="true" name="label" type="String" />
+		<column localized="true" name="description" type="String" />
 		<column name="localized" type="boolean" />
 		<column name="name" type="String" />
 		<column name="readOnly" type="String" />
@@ -834,6 +841,7 @@
 		<column method-name="DBTableName" name="dbTableName" type="String" />
 		<column name="edge" type="boolean" />
 		<column localized="true" name="label" type="String" />
+		<column localized="true" name="description" type="String" />
 		<column name="name" type="String" />
 		<column name="reverse" type="boolean" />
 		<column name="system" type="boolean" />

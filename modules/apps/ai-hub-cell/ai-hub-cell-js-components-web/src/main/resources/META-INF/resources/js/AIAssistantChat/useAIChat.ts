@@ -14,7 +14,9 @@ import {
 import {classifyCategorizationIntent} from '../Categorization/services/classifyCategorizationIntent';
 import {ECategorizationAgent} from '../Categorization/types';
 import submitPositiveReportFeedback from '../ReportFeedback/submitPositiveReportFeedback';
+import {RequestTooLargeError} from '../utils/throwIfRequestTooLarge';
 import {
+	AIAssistantActionOutcome,
 	ChatContext,
 	createEventSource,
 	postChatByExternalReferenceCodeMessage,
@@ -42,6 +44,7 @@ export interface AIChat {
 	message: string;
 	messages: Message[];
 	messagesContainerRef: React.RefObject<HTMLDivElement>;
+	onAction: (outcome: AIAssistantActionOutcome) => void;
 	reportContext: AIChatReportContext | null;
 	runtimeContextRef: React.MutableRefObject<ChatContext>;
 	scrollToBottom: () => void;
@@ -61,6 +64,7 @@ interface UseAIChatProps {
 	getContext?: () => ChatContext;
 	initialMessage?: string;
 	instructionDefinitionScope: string;
+	onAction?: (outcome: AIAssistantActionOutcome) => void;
 	onCloseRequested?: () => void;
 	onOpenRequested?: (options?: {expanded?: boolean}) => void;
 	triggerRef?: React.RefObject<HTMLButtonElement | null>;
@@ -73,6 +77,7 @@ export default function useAIChat({
 	getContext,
 	initialMessage,
 	instructionDefinitionScope,
+	onAction: onActionProp,
 	onCloseRequested,
 	onOpenRequested,
 	triggerRef,
@@ -108,6 +113,9 @@ export default function useAIChat({
 		Liferay.ThemeDisplay.getLanguageId()
 	);
 	const fileUploadSelectorRef = useRef<string | undefined>(undefined);
+	const onActionRef = useRef<
+		((outcome: AIAssistantActionOutcome) => void) | undefined
+	>(onActionProp);
 	const onCloseRequestedRef = useRef<(() => void) | undefined>(
 		onCloseRequested
 	);
@@ -125,6 +133,7 @@ export default function useAIChat({
 		enableFreeFormCategorizationRef.current = enableFreeFormCategorization;
 		getContextRef.current = getContext;
 		instructionDefinitionScopeRef.current = instructionDefinitionScope;
+		onActionRef.current = onActionProp;
 		onCloseRequestedRef.current = onCloseRequested;
 		onOpenRequestedRef.current = onOpenRequested;
 	}, [
@@ -133,9 +142,14 @@ export default function useAIChat({
 		enableFreeFormCategorization,
 		getContext,
 		instructionDefinitionScope,
+		onActionProp,
 		onCloseRequested,
 		onOpenRequested,
 	]);
+
+	const onAction = useCallback((outcome: AIAssistantActionOutcome) => {
+		onActionRef.current?.(outcome);
+	}, []);
 
 	useEffect(() => {
 		const fieldId = triggerRef?.current
@@ -185,7 +199,10 @@ export default function useAIChat({
 		};
 	}, []);
 
-	const reportSendFailure = useCallback(() => {
+	const reportSendFailure = useCallback((message?: string) => {
+		const text =
+			message ?? Liferay.Language.get('an-unexpected-error-occurred');
+
 		setIsGenerating(false);
 
 		setMessages((previousMessages) => [
@@ -193,12 +210,12 @@ export default function useAIChat({
 			{
 				error: true,
 				sender: 'assistant',
-				text: Liferay.Language.get('an-unexpected-error-occurred'),
+				text,
 			},
 		]);
 
 		Liferay.Util.openToast({
-			message: Liferay.Language.get('an-unexpected-error-occurred'),
+			message: text,
 			type: 'danger',
 		});
 	}, []);
@@ -240,8 +257,15 @@ export default function useAIChat({
 					message: text,
 				})
 					.then(() => true)
-					.catch(() => {
-						reportSendFailure();
+					.catch((error) => {
+						if (error instanceof RequestTooLargeError) {
+							setMessage(text);
+
+							reportSendFailure(error.message);
+						}
+						else {
+							reportSendFailure();
+						}
 
 						return false;
 					});
@@ -559,6 +583,7 @@ export default function useAIChat({
 		message,
 		messages,
 		messagesContainerRef,
+		onAction,
 		reportContext,
 		runtimeContextRef,
 		scrollToBottom,

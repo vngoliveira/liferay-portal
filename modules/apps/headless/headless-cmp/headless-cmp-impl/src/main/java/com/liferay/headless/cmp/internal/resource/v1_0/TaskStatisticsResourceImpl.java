@@ -19,7 +19,7 @@ import com.liferay.object.service.ObjectEntryLocalService;
 import com.liferay.object.service.ObjectEntryService;
 import com.liferay.petra.sql.dsl.expression.Predicate;
 import com.liferay.petra.string.StringPool;
-import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
+import com.liferay.site.cms.site.initializer.util.CMPLicenseUtil;
 
 import java.time.LocalDate;
 
@@ -43,11 +43,7 @@ public class TaskStatisticsResourceImpl extends BaseTaskStatisticsResourceImpl {
 	public TaskStatistics getProjectTaskStatistics(Long projectId)
 		throws Exception {
 
-		if (!FeatureFlagManagerUtil.isEnabled(
-				contextCompany.getCompanyId(), "LPD-58677")) {
-
-			throw new UnsupportedOperationException();
-		}
+		CMPLicenseUtil.checkAppEnabled();
 
 		return _toTaskStatistics(
 			_objectEntryService.getObjectEntry(projectId),
@@ -58,11 +54,7 @@ public class TaskStatisticsResourceImpl extends BaseTaskStatisticsResourceImpl {
 
 	@Override
 	public TaskStatistics getTaskStatistics() throws Exception {
-		if (!FeatureFlagManagerUtil.isEnabled(
-				contextCompany.getCompanyId(), "LPD-58677")) {
-
-			throw new UnsupportedOperationException();
-		}
+		CMPLicenseUtil.checkAppEnabled();
 
 		return _toTaskStatistics(
 			null,

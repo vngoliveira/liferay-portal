@@ -33,6 +33,7 @@ import com.liferay.dynamic.data.mapping.util.DDMFormValuesToFieldsConverter;
 import com.liferay.fragment.constants.FragmentConstants;
 import com.liferay.fragment.constants.FragmentEntryLinkConstants;
 import com.liferay.fragment.contributor.FragmentCollectionContributorRegistry;
+import com.liferay.fragment.entry.processor.analytics.AnalyticsAttributesContributor;
 import com.liferay.fragment.entry.processor.constants.FragmentEntryProcessorConstants;
 import com.liferay.fragment.entry.processor.helper.FragmentEntryProcessorHelper;
 import com.liferay.fragment.entry.processor.util.AnalyticsAttributesUtil;
@@ -152,6 +153,11 @@ import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.ServiceRegistration;
 
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -1639,6 +1645,58 @@ public class EditableFragmentEntryProcessorTest {
 	}
 
 	@Test
+	@TestInfo("LPD-104492")
+	public void testFragmentEntryProcessorEditableAssertContributedAnalyticsAttributes()
+		throws Exception {
+
+		Bundle bundle = FrameworkUtil.getBundle(
+			EditableFragmentEntryProcessorTest.class);
+
+		BundleContext bundleContext = bundle.getBundleContext();
+
+		String value = RandomTestUtil.randomString();
+
+		ServiceRegistration<AnalyticsAttributesContributor>
+			serviceRegistration = bundleContext.registerService(
+				AnalyticsAttributesContributor.class,
+				(infoItemFieldMapped, locale) ->
+					HashMapBuilder.<String, Object>put(
+						"analytics-asset-action", value
+					).put(
+						"analytics-asset-title", value
+					).put(
+						"analytics-test-attribute", value
+					).build(),
+				null);
+
+		try {
+			FileEntry fileEntry = _addImageFileEntry(
+				RandomTestUtil.randomString());
+
+			Element element = _getElement(
+				"data-lfr-editable-id", "link",
+				_getEditableFieldValues(
+					_portal.getClassNameId(FileEntry.class),
+					fileEntry.getFileEntryId(), "FileEntry_previewURL",
+					"link/fragment_entry_link_mapped_asset_field.json"),
+				"link/fragment_entry_link_button.html", LocaleUtil.US,
+				FragmentEntryLinkConstants.VIEW);
+
+			Assert.assertEquals(
+				AnalyticsAttributesUtil.ACTION_IMPRESSION,
+				element.attr("data-analytics-asset-action"));
+			Assert.assertEquals(
+				fileEntry.getTitle(),
+				element.attr("data-analytics-asset-title"));
+			Assert.assertEquals(
+				value, element.attr("data-analytics-test-attribute"));
+		}
+		finally {
+			serviceRegistration.unregister();
+		}
+	}
+
+	@Test
 	@TestInfo("LPD-34747")
 	public void testFragmentEntryProcessorEditableLinkInlineValueEditMode()
 		throws Exception {
@@ -2390,7 +2448,7 @@ public class EditableFragmentEntryProcessorTest {
 		return _objectActionLocalService.addObjectAction(
 			RandomTestUtil.randomString(), TestPropsValues.getUserId(),
 			objectDefinitionId, true, StringPool.BLANK,
-			RandomTestUtil.randomString(),
+			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			labelMap, RandomTestUtil.randomString(),
 			ObjectActionExecutorConstants.KEY_WEBHOOK,
@@ -2406,8 +2464,8 @@ public class EditableFragmentEntryProcessorTest {
 	private ObjectDefinition _addObjectDefinition() throws Exception {
 		ObjectDefinition objectDefinition =
 			_objectDefinitionLocalService.addCustomObjectDefinition(
-				null, TestPropsValues.getUserId(), 0, null, true, false, true,
-				false, true, false, false, false, false, null,
+				null, TestPropsValues.getUserId(), 0, null, null, true, false,
+				true, false, true, false, false, false, false, null,
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 				ObjectDefinitionTestUtil.getRandomName(), null,
 				"control_panel.sites",
@@ -2489,7 +2547,7 @@ public class EditableFragmentEntryProcessorTest {
 		ObjectDefinition objectDefinition =
 			_objectDefinitionLocalService.addCustomObjectDefinition(
 				null, TestPropsValues.getUserId(),
-				objectFolder.getObjectFolderId(), null, true, false, true,
+				objectFolder.getObjectFolderId(), null, null, true, false, true,
 				false, true, false, false, false, false, null,
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 				ObjectDefinitionTestUtil.getRandomName(), null, null,
