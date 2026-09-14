@@ -639,7 +639,7 @@ public class ResourceOpenAPIParser {
 			return "";
 		}
 
-		StringBundler sb = new StringBundler(5);
+		StringBundler sb = new StringBundler(6);
 
 		sb.append(
 			StringBundler.concat(
@@ -663,6 +663,10 @@ public class ResourceOpenAPIParser {
 		if (parameter.getExample() != null) {
 			sb.append(
 				String.format(", example = \"%s\"", parameter.getExample()));
+		}
+
+		if (parameter.isRequired()) {
+			sb.append(String.format(", required = %s", parameter.isRequired()));
 		}
 
 		sb.append("),");
@@ -867,6 +871,7 @@ public class ResourceOpenAPIParser {
 				StringUtil.equals(parameterName, "fields") ||
 				StringUtil.equals(parameterName, "filter") ||
 				StringUtil.equals(parameterName, "nestedFields") ||
+				StringUtil.equals(parameterName, "nestedFieldsDepth") ||
 				StringUtil.equals(parameterName, "restrictFields") ||
 				StringUtil.equals(parameterName, "sort")) {
 
@@ -1745,6 +1750,7 @@ public class ResourceOpenAPIParser {
 			StringUtil.equals(name, "flatten") ||
 			StringUtil.equals(name, "id") ||
 			StringUtil.equals(name, "nestedFields") ||
+			StringUtil.equals(name, "nestedFieldsDepth") ||
 			StringUtil.equals(name, "page") ||
 			StringUtil.equals(name, "pageSize") ||
 			StringUtil.equals(name, "pagination") ||

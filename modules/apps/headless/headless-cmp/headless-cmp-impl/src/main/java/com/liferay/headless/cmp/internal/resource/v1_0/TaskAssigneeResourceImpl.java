@@ -10,7 +10,6 @@ import com.liferay.headless.cmp.dto.v1_0.TaskAssignee;
 import com.liferay.headless.cmp.resource.v1_0.TaskAssigneeResource;
 import com.liferay.object.model.ObjectEntry;
 import com.liferay.object.service.ObjectEntryService;
-import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.model.role.RoleConstants;
 import com.liferay.portal.kernel.service.RoleService;
@@ -24,6 +23,7 @@ import com.liferay.portal.kernel.util.comparator.UserFirstNameComparator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.vulcan.pagination.Page;
 import com.liferay.site.cms.site.initializer.users.provider.CMSUsersProvider;
+import com.liferay.site.cms.site.initializer.util.CMPLicenseUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,11 +46,7 @@ public class TaskAssigneeResourceImpl extends BaseTaskAssigneeResourceImpl {
 			Long projectId, String search, String type)
 		throws Exception {
 
-		if (!FeatureFlagManagerUtil.isEnabled(
-				contextCompany.getCompanyId(), "LPD-58677")) {
-
-			throw new UnsupportedOperationException();
-		}
+		CMPLicenseUtil.checkAppEnabled();
 
 		return _getTaskAssigneesPage(
 			_objectEntryService.getObjectEntry(projectId), search, type);
@@ -58,6 +54,8 @@ public class TaskAssigneeResourceImpl extends BaseTaskAssigneeResourceImpl {
 
 	@Override
 	public Page<TaskAssignee> getTaskAssigneesPage(String search, String type) {
+		CMPLicenseUtil.checkAppEnabled();
+
 		return _getTaskAssigneesPage(null, search, type);
 	}
 

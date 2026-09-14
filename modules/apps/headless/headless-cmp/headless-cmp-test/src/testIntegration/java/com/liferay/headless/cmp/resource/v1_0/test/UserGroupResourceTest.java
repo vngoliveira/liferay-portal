@@ -15,6 +15,7 @@ import com.liferay.headless.cmp.client.pagination.Page;
 import com.liferay.headless.cmp.client.pagination.Pagination;
 import com.liferay.headless.cmp.client.problem.Problem;
 import com.liferay.headless.cmp.client.resource.v1_0.UserGroupResource;
+import com.liferay.headless.cmp.resource.v1_0.test.util.CMPLicenseTestUtil;
 import com.liferay.object.model.ObjectEntry;
 import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.User;
@@ -32,8 +33,6 @@ import com.liferay.portal.kernel.test.util.UserGroupTestUtil;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
-import com.liferay.portal.test.rule.FeatureFlag;
-import com.liferay.portal.test.rule.FeatureFlags;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
@@ -51,7 +50,6 @@ import org.junit.runner.RunWith;
 /**
  * @author Larissa Ribeiro
  */
-@FeatureFlags(featureFlags = @FeatureFlag("LPD-58677"))
 @RunWith(Arquillian.class)
 public class UserGroupResourceTest extends BaseUserGroupResourceTestCase {
 
@@ -79,6 +77,7 @@ public class UserGroupResourceTest extends BaseUserGroupResourceTestCase {
 	public void testGetProjectUserGroupsPage() throws Exception {
 		super.testGetProjectUserGroupsPage();
 
+		_testGetProjectUserGroupsPageWithAppDisabled();
 		_testGetProjectUserGroupsPageWithMultipleDepotEntries();
 		_testGetProjectUserGroupsPageWithProjectManager();
 		_testGetProjectUserGroupsPageWithProjectMember();
@@ -158,6 +157,27 @@ public class UserGroupResourceTest extends BaseUserGroupResourceTestCase {
 		).locale(
 			LocaleUtil.getDefault()
 		).build();
+	}
+
+	private void _testGetProjectUserGroupsPageWithAppDisabled()
+		throws Exception {
+
+		ObjectEntry objectEntry = CMPTestUtil.addCMPProjectObjectEntry();
+
+		try (AutoCloseable autoCloseable =
+				CMPLicenseTestUtil.withAppDisabled()) {
+
+			assertHttpResponseStatusCode(
+				400,
+				userGroupResource.getProjectUserGroupsPageHttpResponse(
+					objectEntry.getObjectEntryId(), null,
+					Pagination.of(1, 100)));
+		}
+
+		assertHttpResponseStatusCode(
+			200,
+			userGroupResource.getProjectUserGroupsPageHttpResponse(
+				objectEntry.getObjectEntryId(), null, Pagination.of(1, 100)));
 	}
 
 	private void _testGetProjectUserGroupsPageWithMultipleDepotEntries()

@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import com.liferay.petra.function.UnsafeSupplier;
 import com.liferay.petra.string.StringBundler;
+import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.vulcan.graphql.annotation.GraphQLField;
 import com.liferay.portal.vulcan.graphql.annotation.GraphQLName;
@@ -27,6 +28,8 @@ import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
@@ -40,11 +43,11 @@ import java.util.function.Supplier;
  */
 @Generated("")
 @GraphQLName(
-	description = "Buyer-facing projection of a committed (non-open) commerce order. Read via the placed-orders list or by id and ERC; PATCH applies JSON Merge Patch to a small set of buyer-editable fields (name, printedNote, purchaseOrderNumber). The open cart counterpart lives in headless-commerce-delivery-cart.",
+	description = "Buyer-facing projection of a committed (non-open) commerce order. Read via the placed-orders list or by ID and ERC; PATCH applies JSON Merge Patch to a small set of buyer-editable fields (name, printedNote, purchaseOrderNumber). The open cart counterpart lives in headless-commerce-delivery-cart.",
 	value = "PlacedOrder"
 )
 @io.swagger.v3.oas.annotations.media.Schema(
-	description = "Buyer-facing projection of a committed (non-open) commerce order. Read via the placed-orders list or by id and ERC; PATCH applies JSON Merge Patch to a small set of buyer-editable fields (name, printedNote, purchaseOrderNumber). The open cart counterpart lives in headless-commerce-delivery-cart."
+	description = "Buyer-facing projection of a committed (non-open) commerce order. Read via the placed-orders list or by ID and ERC; PATCH applies JSON Merge Patch to a small set of buyer-editable fields (name, printedNote, purchaseOrderNumber). The open cart counterpart lives in headless-commerce-delivery-cart."
 )
 @JsonFilter("Liferay.Vulcan")
 @XmlRootElement(name = "PlacedOrder")
@@ -1019,7 +1022,7 @@ public class PlacedOrder implements Serializable {
 	private Supplier<Long> _orderTypeIdSupplier;
 
 	@io.swagger.v3.oas.annotations.media.Schema(
-		description = "Stable UUID of the order, distinct from id and preserved across data migrations. Use this value when persisting a reference to the order in external systems. Read-only.",
+		description = "Stable UUID of the order, distinct from ID and preserved across data migrations. Use this value when persisting a reference to the order in external systems. Read-only.",
 		example = "f0b1c2d3-4e5f-6a7b-8c9d-0e1f2a3b4c5d"
 	)
 	public String getOrderUUID() {
@@ -1056,7 +1059,7 @@ public class PlacedOrder implements Serializable {
 	}
 
 	@GraphQLField(
-		description = "Stable UUID of the order, distinct from id and preserved across data migrations. Use this value when persisting a reference to the order in external systems. Read-only."
+		description = "Stable UUID of the order, distinct from ID and preserved across data migrations. Use this value when persisting a reference to the order in external systems. Read-only."
 	)
 	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
 	protected String orderUUID;
@@ -2926,6 +2929,27 @@ public class PlacedOrder implements Serializable {
 		return sb.toString();
 	}
 
+	private static String _toJSON(Object value) {
+		if (value instanceof Collection) {
+			return String.valueOf(
+				JSONFactoryUtil.createJSONArray((Collection<?>)value));
+		}
+		else if (value instanceof Map) {
+			return String.valueOf(
+				JSONFactoryUtil.createJSONObject((Map<?, ?>)value));
+		}
+		else if (value instanceof Object[]) {
+			return String.valueOf(
+				JSONFactoryUtil.createJSONArray(
+					Arrays.asList((Object[])value)));
+		}
+		else if (value instanceof String) {
+			return StringBundler.concat("\"", _escape(value), "\"");
+		}
+
+		return String.valueOf(value);
+	}
+
 	private static final String[][] _JSON_ESCAPE_STRINGS = {
 		{"\\", "\"", "\b", "\f", "\n", "\r", "\t"},
 		{"\\\\", "\\\"", "\\b", "\\f", "\\n", "\\r", "\\t"}
@@ -2934,4 +2958,4 @@ public class PlacedOrder implements Serializable {
 	private Map<String, Serializable> _extendedProperties;
 
 }
-// LIFERAY-REST-BUILDER-HASH:2126157850
+// LIFERAY-REST-BUILDER-HASH:-487651175

@@ -81,7 +81,7 @@ public abstract class BasePlacedOrderItemShipmentResourceImpl
 			@io.swagger.v3.oas.annotations.Parameter(
 				description = "External reference code that addresses the target resource on the by-externalReferenceCode paths. The code is the integration-supplied idempotency key, unique within the resource scope.",
 				in = io.swagger.v3.oas.annotations.enums.ParameterIn.PATH,
-				name = "externalReferenceCode"
+				name = "externalReferenceCode", required = true
 			)
 		}
 	)
@@ -115,14 +115,14 @@ public abstract class BasePlacedOrderItemShipmentResourceImpl
 	 * curl -X 'GET' 'http://localhost:8080/o/headless-commerce-delivery-order/v1.0/placed-order-items/{placedOrderItemId}/placed-order-item-shipments'  -u 'test@liferay.com:test'
 	 */
 	@io.swagger.v3.oas.annotations.Operation(
-		description = "Lists the shipments that fulfill the placed-order line item addressed by id. Includes drop-ship supplier shipments when the line was fulfilled through supplier orders. The parent order must not be OPEN."
+		description = "Lists the shipments that fulfill the placed-order line item addressed by ID. Includes drop-ship supplier shipments when the line was fulfilled through supplier orders. The parent order must not be OPEN."
 	)
 	@io.swagger.v3.oas.annotations.Parameters(
 		value = {
 			@io.swagger.v3.oas.annotations.Parameter(
 				description = "Internal identifier of a placed order item under a non-open placed order. Addresses the line-item scope for read and nested-shipment listing.",
 				in = io.swagger.v3.oas.annotations.enums.ParameterIn.PATH,
-				name = "placedOrderItemId"
+				name = "placedOrderItemId", required = true
 			)
 		}
 	)
@@ -160,7 +160,7 @@ public abstract class BasePlacedOrderItemShipmentResourceImpl
 			@io.swagger.v3.oas.annotations.Parameter(
 				description = "Internal identifier of a placed order item under a non-open placed order. Addresses the line-item scope for read and nested-shipment listing.",
 				in = io.swagger.v3.oas.annotations.enums.ParameterIn.PATH,
-				name = "placedOrderItemId"
+				name = "placedOrderItemId", required = true
 			),
 			@io.swagger.v3.oas.annotations.Parameter(
 				in = io.swagger.v3.oas.annotations.enums.ParameterIn.QUERY,
@@ -903,4 +903,4 @@ public abstract class BasePlacedOrderItemShipmentResourceImpl
 		LogFactoryUtil.getLog(BasePlacedOrderItemShipmentResourceImpl.class);
 
 }
-// LIFERAY-REST-BUILDER-HASH:-1168386829
+// LIFERAY-REST-BUILDER-HASH:-1217616313

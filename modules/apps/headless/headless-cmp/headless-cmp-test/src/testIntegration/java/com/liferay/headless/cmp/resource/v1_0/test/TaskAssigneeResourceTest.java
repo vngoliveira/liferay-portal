@@ -12,6 +12,7 @@ import com.liferay.depot.model.DepotEntry;
 import com.liferay.depot.service.DepotEntryLocalService;
 import com.liferay.headless.cmp.client.dto.v1_0.TaskAssignee;
 import com.liferay.headless.cmp.client.pagination.Page;
+import com.liferay.headless.cmp.resource.v1_0.test.util.CMPLicenseTestUtil;
 import com.liferay.object.model.ObjectEntry;
 import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.User;
@@ -25,8 +26,6 @@ import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
-import com.liferay.portal.test.rule.FeatureFlag;
-import com.liferay.portal.test.rule.FeatureFlags;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
@@ -42,7 +41,6 @@ import org.junit.runner.RunWith;
 /**
  * @author Carolina Barbosa
  */
-@FeatureFlags(featureFlags = @FeatureFlag("LPD-58677"))
 @RunWith(Arquillian.class)
 public class TaskAssigneeResourceTest extends BaseTaskAssigneeResourceTestCase {
 
@@ -131,6 +129,8 @@ public class TaskAssigneeResourceTest extends BaseTaskAssigneeResourceTestCase {
 			"User",
 			taskAssigneeResource.getProjectTaskAssigneesPage(
 				objectEntry.getObjectEntryId(), null, "User"));
+
+		_testGetProjectTaskAssigneesPageWithAppDisabled(objectEntry);
 	}
 
 	@Override
@@ -188,6 +188,9 @@ public class TaskAssigneeResourceTest extends BaseTaskAssigneeResourceTestCase {
 			"Role", taskAssigneeResource.getTaskAssigneesPage(null, "Role"));
 		_assertTaskAssigneeType(
 			"User", taskAssigneeResource.getTaskAssigneesPage(null, "User"));
+
+		_testGetTaskAssigneesPageWithAppDisabled();
+		_testGetTaskAssigneesPageWithAppExpired();
 	}
 
 	protected String[] getAdditionalAssertFieldNames() {
@@ -200,6 +203,55 @@ public class TaskAssigneeResourceTest extends BaseTaskAssigneeResourceTestCase {
 		for (TaskAssignee taskAssignee : page.getItems()) {
 			Assert.assertEquals(expectedType, taskAssignee.getType());
 		}
+	}
+
+	private void _testGetProjectTaskAssigneesPageWithAppDisabled(
+			ObjectEntry objectEntry)
+		throws Exception {
+
+		try (AutoCloseable autoCloseable =
+				CMPLicenseTestUtil.withAppDisabled()) {
+
+			assertHttpResponseStatusCode(
+				400,
+				taskAssigneeResource.getProjectTaskAssigneesPageHttpResponse(
+					objectEntry.getObjectEntryId(), null, null));
+		}
+
+		assertHttpResponseStatusCode(
+			200,
+			taskAssigneeResource.getProjectTaskAssigneesPageHttpResponse(
+				objectEntry.getObjectEntryId(), null, null));
+	}
+
+	private void _testGetTaskAssigneesPageWithAppDisabled() throws Exception {
+		try (AutoCloseable autoCloseable =
+				CMPLicenseTestUtil.withAppDisabled()) {
+
+			assertHttpResponseStatusCode(
+				400,
+				taskAssigneeResource.getTaskAssigneesPageHttpResponse(
+					null, null));
+		}
+
+		assertHttpResponseStatusCode(
+			200,
+			taskAssigneeResource.getTaskAssigneesPageHttpResponse(null, null));
+	}
+
+	private void _testGetTaskAssigneesPageWithAppExpired() throws Exception {
+		try (AutoCloseable autoCloseable =
+				CMPLicenseTestUtil.withAppExpired()) {
+
+			assertHttpResponseStatusCode(
+				400,
+				taskAssigneeResource.getTaskAssigneesPageHttpResponse(
+					null, null));
+		}
+
+		assertHttpResponseStatusCode(
+			200,
+			taskAssigneeResource.getTaskAssigneesPageHttpResponse(null, null));
 	}
 
 	@DeleteAfterTestRun

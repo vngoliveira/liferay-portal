@@ -285,7 +285,7 @@ public class SearchResult implements Serializable {
 	private Supplier<String> _descriptionSupplier;
 
 	@io.swagger.v3.oas.annotations.media.Schema(
-		description = "Asset-specific nested data. The shape depends on entryClassName - blog entries include authorName and assetTagNames, documents include extension and size, custom Objects include their declared fields, and so on. The embedded field is populated only when nestedFields=embedded is requested."
+		description = "Asset-specific nested data. The shape depends on entryClassName - blog entries include authorName and assetTagNames, documents include extension and size, custom Objects include their declared fields, and so on. The embedded field is populated only when nestedFields=embedded is requested. Nested fields of the embedded entity are resolved only for entries requested with the 'embedded.' prefix together with nestedFieldsDepth=2."
 	)
 	@Valid
 	public Object getEmbedded() {
@@ -322,7 +322,7 @@ public class SearchResult implements Serializable {
 	}
 
 	@GraphQLField(
-		description = "Asset-specific nested data. The shape depends on entryClassName - blog entries include authorName and assetTagNames, documents include extension and size, custom Objects include their declared fields, and so on. The embedded field is populated only when nestedFields=embedded is requested."
+		description = "Asset-specific nested data. The shape depends on entryClassName - blog entries include authorName and assetTagNames, documents include extension and size, custom Objects include their declared fields, and so on. The embedded field is populated only when nestedFields=embedded is requested. Nested fields of the embedded entity are resolved only for entries requested with the 'embedded.' prefix together with nestedFieldsDepth=2."
 	)
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected Object embedded;
@@ -624,27 +624,7 @@ public class SearchResult implements Serializable {
 
 			sb.append("\"embedded\": ");
 
-			if (embedded instanceof Collection) {
-				sb.append(
-					JSONFactoryUtil.createJSONArray((Collection<?>)embedded));
-			}
-			else if (embedded instanceof Map) {
-				sb.append(
-					JSONFactoryUtil.createJSONObject((Map<?, ?>)embedded));
-			}
-			else if (embedded instanceof Object[]) {
-				sb.append(
-					JSONFactoryUtil.createJSONArray(
-						Arrays.asList((Object[])embedded)));
-			}
-			else if (embedded instanceof String) {
-				sb.append("\"");
-				sb.append(_escape((String)embedded));
-				sb.append("\"");
-			}
-			else {
-				sb.append(embedded);
-			}
+			sb.append(_toJSON(embedded));
 		}
 
 		String entryClassName = getEntryClassName();
@@ -800,6 +780,27 @@ public class SearchResult implements Serializable {
 		return sb.toString();
 	}
 
+	private static String _toJSON(Object value) {
+		if (value instanceof Collection) {
+			return String.valueOf(
+				JSONFactoryUtil.createJSONArray((Collection<?>)value));
+		}
+		else if (value instanceof Map) {
+			return String.valueOf(
+				JSONFactoryUtil.createJSONObject((Map<?, ?>)value));
+		}
+		else if (value instanceof Object[]) {
+			return String.valueOf(
+				JSONFactoryUtil.createJSONArray(
+					Arrays.asList((Object[])value)));
+		}
+		else if (value instanceof String) {
+			return StringBundler.concat("\"", _escape(value), "\"");
+		}
+
+		return String.valueOf(value);
+	}
+
 	private static final String[][] _JSON_ESCAPE_STRINGS = {
 		{"\\", "\"", "\b", "\f", "\n", "\r", "\t"},
 		{"\\\\", "\\\"", "\\b", "\\f", "\\n", "\\r", "\\t"}
@@ -808,4 +809,4 @@ public class SearchResult implements Serializable {
 	private Map<String, Serializable> _extendedProperties;
 
 }
-// LIFERAY-REST-BUILDER-HASH:-1707493621
+// LIFERAY-REST-BUILDER-HASH:-588384601

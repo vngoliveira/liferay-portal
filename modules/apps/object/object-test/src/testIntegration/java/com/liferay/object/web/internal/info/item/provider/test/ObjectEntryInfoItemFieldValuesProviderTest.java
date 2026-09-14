@@ -204,7 +204,7 @@ public class ObjectEntryInfoItemFieldValuesProviderTest {
 			null, TestPropsValues.getUserId(),
 			_parentObjectDefinition.getObjectDefinitionId(),
 			_childObjectDefinition.getObjectDefinitionId(), 0,
-			ObjectRelationshipConstants.DELETION_TYPE_CASCADE, false,
+			ObjectRelationshipConstants.DELETION_TYPE_CASCADE, null, false,
 			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			"oneToManyRelationshipName", false,
 			ObjectRelationshipConstants.TYPE_ONE_TO_MANY, null);
@@ -260,7 +260,7 @@ public class ObjectEntryInfoItemFieldValuesProviderTest {
 		ObjectAction objectAction = _objectActionLocalService.addObjectAction(
 			RandomTestUtil.randomString(), TestPropsValues.getUserId(),
 			objectEntry.getObjectDefinitionId(), true, StringPool.BLANK,
-			RandomTestUtil.randomString(),
+			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			RandomTestUtil.randomString(),
@@ -559,7 +559,7 @@ public class ObjectEntryInfoItemFieldValuesProviderTest {
 				null, TestPropsValues.getUserId(),
 				parentObjectDefinition.getObjectDefinitionId(),
 				childObjectDefinition.getObjectDefinitionId(), 0,
-				ObjectRelationshipConstants.DELETION_TYPE_CASCADE, true,
+				ObjectRelationshipConstants.DELETION_TYPE_CASCADE, null, true,
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 				"oneToManyRelationshipName", false,
 				ObjectRelationshipConstants.TYPE_ONE_TO_MANY, null);
@@ -590,6 +590,24 @@ public class ObjectEntryInfoItemFieldValuesProviderTest {
 			).build(),
 			ServiceContextTestUtil.getServiceContext());
 
+		ObjectEntry relatedObjectEntry =
+			_objectEntryLocalService.getObjectEntry(
+				parentObjectEntry.getObjectEntryId());
+
+		String parentTitleValue = RandomTestUtil.randomString();
+
+		relatedObjectEntry.setValues(
+			HashMapBuilder.<String, Serializable>putAll(
+				_objectEntryLocalService.getValues(relatedObjectEntry)
+			).put(
+				"parentTitle", parentTitleValue
+			).build());
+
+		childObjectEntry.setRelatedObjectEntry(
+			"r_oneToManyRelationshipName_" +
+				parentObjectDefinition.getPKObjectFieldName(),
+			relatedObjectEntry);
+
 		_pushServiceContext(_getThemeDisplay(StringPool.BLANK, "UTC"));
 
 		InfoItemFieldValuesProvider<ObjectEntry> infoItemFieldValuesProvider =
@@ -606,6 +624,12 @@ public class ObjectEntryInfoItemFieldValuesProviderTest {
 
 		Assert.assertEquals(childTitleValue, infoFieldValue.getValue());
 
+		InfoFieldValue<Object> parentTitleInfoFieldValue =
+			infoItemFieldValues.getInfoFieldValue("parentTitle");
+
+		Assert.assertEquals(
+			parentTitleValue, parentTitleInfoFieldValue.getValue());
+
 		ServiceContextThreadLocal.popServiceContext();
 
 		objectRelationship =
@@ -613,7 +637,7 @@ public class ObjectEntryInfoItemFieldValuesProviderTest {
 				objectRelationship.getExternalReferenceCode(),
 				objectRelationship.getObjectRelationshipId(),
 				objectRelationship.getParameterObjectFieldId(),
-				objectRelationship.getDeletionType(), false,
+				objectRelationship.getDeletionType(), null, false,
 				objectRelationship.getLabelMap(), null);
 
 		_objectRelationshipLocalService.deleteObjectRelationship(
@@ -630,7 +654,7 @@ public class ObjectEntryInfoItemFieldValuesProviderTest {
 		throws Exception {
 
 		return _objectDefinitionLocalService.addCustomObjectDefinition(
-			null, TestPropsValues.getUserId(), 0, null, true, false, true,
+			null, TestPropsValues.getUserId(), 0, null, null, true, false, true,
 			false, true, false, false, false, enableObjectEntryVersioning, null,
 			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 			ObjectDefinitionTestUtil.getRandomName(), null, null,

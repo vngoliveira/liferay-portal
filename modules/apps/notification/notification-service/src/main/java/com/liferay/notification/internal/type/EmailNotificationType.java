@@ -53,6 +53,7 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.messaging.DestinationNames;
 import com.liferay.portal.kernel.messaging.MessageBusUtil;
+import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.GroupConstants;
 import com.liferay.portal.kernel.model.User;
@@ -61,6 +62,7 @@ import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.security.auth.EmailAddressValidator;
 import com.liferay.portal.kernel.security.permission.PermissionCheckerFactory;
+import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.OrganizationLocalService;
 import com.liferay.portal.kernel.service.PersistedModelLocalService;
@@ -82,7 +84,6 @@ import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.KeyValuePair;
 import com.liferay.portal.kernel.util.LocaleUtil;
-import com.liferay.portal.kernel.util.PropsValues;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -586,7 +587,7 @@ public class EmailNotificationType extends BaseNotificationType {
 				NotificationTemplate.class.getName() + StringPool.POUND +
 					notificationTemplate.getNotificationTemplateId(),
 				body),
-			!PropsValues.NOTIFICATION_EMAIL_TEMPLATE_ENABLED);
+			true);
 
 		for (TemplateContextContributor templateContextContributor :
 				_serviceTrackerList) {
@@ -662,6 +663,14 @@ public class EmailNotificationType extends BaseNotificationType {
 				template.put("locale", portal.getLocale(httpServletRequest));
 				template.put(
 					"portalURL", portal.getPortalURL(httpServletRequest));
+			}
+			else {
+				Company company = _companyLocalService.getCompany(
+					group.getCompanyId());
+
+				template.put("locale", siteDefaultLocale);
+				template.put(
+					"portalURL", company.getPortalURL(group.getGroupId()));
 			}
 		}
 		finally {
@@ -809,6 +818,9 @@ public class EmailNotificationType extends BaseNotificationType {
 
 	@Reference
 	private AccountEntryUserRelLocalService _accountEntryUserRelLocalService;
+
+	@Reference
+	private CompanyLocalService _companyLocalService;
 
 	private final Map<String, EmailProvider> _emailProviders = new HashMap<>();
 

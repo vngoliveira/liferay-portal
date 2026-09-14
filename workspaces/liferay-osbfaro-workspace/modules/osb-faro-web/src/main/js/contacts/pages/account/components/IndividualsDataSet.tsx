@@ -5,7 +5,8 @@ import {
 	pagination,
 } from 'shared/components/FrontendDataSet';
 import {formatTime} from 'shared/util/time';
-import {pickBy} from 'lodash';
+import {omit, pickBy} from 'lodash';
+import {RangeKeyTimeRanges} from 'shared/util/constants';
 import {Routes, setUriQueryValues} from 'shared/util/router';
 import {toThousands} from 'shared/util/numbers';
 import {useParams} from 'react-router-dom';
@@ -15,7 +16,7 @@ const FDS_ID = 'account-individuals-dataset';
 
 const PREVIEW_FDS_ID = 'most-engaged-individuals-dataset';
 
-const PREVIEW_DELTA = 3;
+const PREVIEW_DELTA = 5;
 
 const SORTS = [
 	{
@@ -86,10 +87,21 @@ const IndividualsDataSet: React.FC<IIndividualsDataSetProps> = ({
 
 	const rangeQueryValues = pickBy(rangeSelectors);
 
+	/**
+	 * `CUSTOM` is a client side sentinel that keeps the dropdown showing the
+	 * picked dates. The API takes an integer range key and answers anything
+	 * else with a 500, so a custom range travels as its bounds alone.
+	 */
+
+	const apiRangeQueryValues =
+		rangeQueryValues.rangeKey === RangeKeyTimeRanges.CustomRange
+			? omit(rangeQueryValues, 'rangeKey')
+			: rangeQueryValues;
+
 	return (
 		<FrontendDataSet
 			apiURL={setUriQueryValues(
-				{channelId, ...rangeQueryValues},
+				{channelId, ...apiRangeQueryValues},
 				`/o/faro/contacts/${groupId}/account/${id}/individuals`
 			)}
 			customDataRenderers={{

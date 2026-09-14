@@ -11,6 +11,7 @@ import com.liferay.object.admin.rest.client.json.BaseJSONParser;
 
 import jakarta.annotation.Generated;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
@@ -93,6 +94,16 @@ public class ObjectFieldSerDes {
 			sb.append(_escape(objectField.getDefaultValue()));
 
 			sb.append("\"");
+		}
+
+		if (objectField.getDescription() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"description\": ");
+
+			sb.append(_toJSON(objectField.getDescription()));
 		}
 
 		if (objectField.getExternalReferenceCode() != null) {
@@ -407,6 +418,14 @@ public class ObjectFieldSerDes {
 				"defaultValue", String.valueOf(objectField.getDefaultValue()));
 		}
 
+		if (objectField.getDescription() == null) {
+			map.put("description", null);
+		}
+		else {
+			map.put(
+				"description", String.valueOf(objectField.getDescription()));
+		}
+
 		if (objectField.getExternalReferenceCode() == null) {
 			map.put("externalReferenceCode", null);
 		}
@@ -607,6 +626,9 @@ public class ObjectFieldSerDes {
 			else if (Objects.equals(jsonParserFieldName, "defaultValue")) {
 				return false;
 			}
+			else if (Objects.equals(jsonParserFieldName, "description")) {
+				return true;
+			}
 			else if (Objects.equals(
 						jsonParserFieldName, "externalReferenceCode")) {
 
@@ -719,6 +741,12 @@ public class ObjectFieldSerDes {
 			else if (Objects.equals(jsonParserFieldName, "defaultValue")) {
 				if (jsonParserFieldValue != null) {
 					objectField.setDefaultValue((String)jsonParserFieldValue);
+				}
+			}
+			else if (Objects.equals(jsonParserFieldName, "description")) {
+				if (jsonParserFieldValue != null) {
+					objectField.setDescription(
+						(Map<String, String>)jsonParserFieldValue);
 				}
 			}
 			else if (Objects.equals(
@@ -920,6 +948,12 @@ public class ObjectFieldSerDes {
 			return "null";
 		}
 
+		if (value instanceof Collection) {
+			Collection<?> collection = (Collection<?>)value;
+
+			return _toJSON(collection.toArray());
+		}
+
 		if (value instanceof Map) {
 			return _toJSON((Map)value);
 		}
@@ -952,4 +986,4 @@ public class ObjectFieldSerDes {
 	}
 
 }
-// LIFERAY-REST-BUILDER-HASH:-2063239223
+// LIFERAY-REST-BUILDER-HASH:-954382079

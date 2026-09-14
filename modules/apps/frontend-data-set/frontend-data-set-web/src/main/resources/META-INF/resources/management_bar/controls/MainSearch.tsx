@@ -5,44 +5,109 @@
 
 import {ClayButtonWithIcon} from '@clayui/button';
 import {ClayInput} from '@clayui/form';
-import React, {useContext, useEffect, useState} from 'react';
+import {cancelDebounce, debounce} from 'frontend-js-web';
+import React, {useContext, useEffect, useMemo, useRef, useState} from 'react';
 
 import FrontendDataSetContext from '../../FrontendDataSetContext';
+import {SEARCH_AS_YOU_TYPE_DEBOUNCE_DELAY} from '../../constants';
+import SearchSuggestionsMenu from './SearchSuggestionsMenu';
 
 function MainSearch({onClear}: {onClear: () => void}) {
-	const {apiURL, appURL, onSearch, searchParam} = useContext(
-		FrontendDataSetContext
-	);
+	const {
+		apiURL,
+		appURL,
+		onSearch,
+		searchAsYouType,
+		searchParam,
+		searchSuggestionsEnabled,
+	} = useContext(FrontendDataSetContext);
 
 	const [inputValue, setInputValue] = useState(searchParam || '');
+	const [searchSuggestionsActive, setSearchSuggestionsActive] =
+		useState(false);
+
+	const inputGroupItemRef = useRef<HTMLDivElement>(null);
+
+	const debouncedSearch = useMemo(
+		() =>
+			debounce(
+				(query: string) => onSearch({query}),
+				SEARCH_AS_YOU_TYPE_DEBOUNCE_DELAY
+			),
+		[onSearch]
+	);
 
 	useEffect(() => {
 		setInputValue(searchParam || '');
 	}, [searchParam]);
 
+	useEffect(() => () => cancelDebounce(debouncedSearch), [debouncedSearch]);
+
+	const uncontrolledItems = Boolean(apiURL || appURL);
+
+	const doSearch = (query: string) => {
+		if (searchAsYouType) {
+			return;
+		}
+
+		onSearch({query});
+	};
+
+	// Clicking counts as well as focusing, because an input that already holds
+	// the focus fires no focus event, and it does hold it after a search or
+	// after Escape closed the dropdown
+
+	const openSearchSuggestions = () => {
+		if (!searchSuggestionsEnabled) {
+			return;
+		}
+
+		setSearchSuggestionsActive(true);
+	};
+
 	return (
 		<ClayInput.Group>
-			<ClayInput.GroupItem>
+			<ClayInput.GroupItem ref={inputGroupItemRef}>
 				<ClayInput
 					aria-label={Liferay.Language.get('search')}
 					className="input-group-inset input-group-inset-after"
 					onChange={(event) => {
-						setInputValue(event.target.value);
+						const query = event.target.value;
 
-						if (!event.target.value) {
+						setInputValue(query);
+
+						if (!query) {
 							onClear();
 						}
 
-						if (!apiURL && !appURL) {
-							onSearch({query: event.target.value});
+						if (!searchAsYouType) {
+							return;
+						}
+
+						if (uncontrolledItems) {
+							if (query) {
+								debouncedSearch(query);
+							}
+							else {
+								cancelDebounce(debouncedSearch);
+							}
+						}
+						else {
+							onSearch({query});
 						}
 					}}
+					onClick={openSearchSuggestions}
+					onFocus={openSearchSuggestions}
 					onKeyDown={(event) => {
-						if (event.key === 'Enter' && (apiURL || appURL)) {
-							event.preventDefault();
-
-							onSearch({query: inputValue});
+						if (event.key !== 'Enter') {
+							return;
 						}
+
+						event.preventDefault();
+
+						setSearchSuggestionsActive(false);
+
+						doSearch(inputValue);
 					}}
 					placeholder={Liferay.Language.get('search')}
 					type="search"
@@ -57,12 +122,29 @@ function MainSearch({onClear}: {onClear: () => void}) {
 						onClick={(event) => {
 							event.preventDefault();
 
-							onSearch({query: inputValue});
+							setSearchSuggestionsActive(false);
+
+							doSearch(inputValue);
 						}}
 						symbol="search"
 						type="submit"
 					/>
 				</ClayInput.GroupInsetItem>
+
+				{searchSuggestionsActive && (
+					<SearchSuggestionsMenu
+						alignElementRef={inputGroupItemRef}
+						onActiveChange={setSearchSuggestionsActive}
+						onQueryClick={(query) => {
+							setSearchSuggestionsActive(false);
+
+							setInputValue(query);
+
+							doSearch(query);
+						}}
+						value={inputValue}
+					/>
+				)}
 			</ClayInput.GroupItem>
 		</ClayInput.Group>
 	);

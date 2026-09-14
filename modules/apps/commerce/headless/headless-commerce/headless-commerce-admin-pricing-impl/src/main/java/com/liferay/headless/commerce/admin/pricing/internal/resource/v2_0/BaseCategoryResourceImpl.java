@@ -47,14 +47,14 @@ public abstract class BaseCategoryResourceImpl implements CategoryResource {
 	 * curl -X 'GET' 'http://localhost:8080/o/headless-commerce-admin-pricing/v2.0/discount-categories/{discountCategoryId}/category'  -u 'test@liferay.com:test'
 	 */
 	@io.swagger.v3.oas.annotations.Operation(
-		description = "Returns the Category nested in a DiscountCategory (via discount link) addressed by internal rel id."
+		description = "Returns the Category nested in a DiscountCategory (via discount link) addressed by internal rel ID."
 	)
 	@io.swagger.v3.oas.annotations.Parameters(
 		value = {
 			@io.swagger.v3.oas.annotations.Parameter(
 				description = "Internal numeric identifier of the target discount-category binding. Server-assigned and stable across the resource's lifetime.",
 				in = io.swagger.v3.oas.annotations.enums.ParameterIn.PATH,
-				name = "discountCategoryId"
+				name = "discountCategoryId", required = true
 			)
 		}
 	)
@@ -81,14 +81,14 @@ public abstract class BaseCategoryResourceImpl implements CategoryResource {
 	 * curl -X 'GET' 'http://localhost:8080/o/headless-commerce-admin-pricing/v2.0/price-modifier-categories/{priceModifierCategoryId}/category'  -u 'test@liferay.com:test'
 	 */
 	@io.swagger.v3.oas.annotations.Operation(
-		description = "Returns the Category nested in a PriceModifierCategory (via price modifier link) addressed by internal rel id."
+		description = "Returns the Category nested in a PriceModifierCategory (via price modifier link) addressed by internal rel ID."
 	)
 	@io.swagger.v3.oas.annotations.Parameters(
 		value = {
 			@io.swagger.v3.oas.annotations.Parameter(
 				description = "Internal numeric identifier of the target price-modifier-category binding. Server-assigned and stable across the resource's lifetime.",
 				in = io.swagger.v3.oas.annotations.enums.ParameterIn.PATH,
-				name = "priceModifierCategoryId"
+				name = "priceModifierCategoryId", required = true
 			)
 		}
 	)
@@ -556,4 +556,4 @@ public abstract class BaseCategoryResourceImpl implements CategoryResource {
 		LogFactoryUtil.getLog(BaseCategoryResourceImpl.class);
 
 }
-// LIFERAY-REST-BUILDER-HASH:134912438
+// LIFERAY-REST-BUILDER-HASH:-1084660196

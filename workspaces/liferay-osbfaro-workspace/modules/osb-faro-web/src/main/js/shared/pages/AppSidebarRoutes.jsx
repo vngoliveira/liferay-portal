@@ -124,6 +124,20 @@ const IndividualsDashboardCDP = lazy(() =>
 	)
 );
 
+/* Campaigns */
+
+const CampaignsDashboard = lazy(() =>
+	import(
+		/* webpackChunkName: "CampaignsDashboard" */ '../../campaigns/pages'
+	)
+);
+
+const CampaignDetail = lazy(() =>
+	import(
+		/* webpackChunkName: "CampaignDetail" */ '../../campaigns/pages/CampaignDetail'
+	)
+);
+
 /* Lifecycle */
 const LifecycleDashboard = lazy(() =>
 	import(
@@ -256,6 +270,30 @@ const AppSidebarRoutes = ({LDPEnabled, currentUser, groupId}) => {
 										/>
 									}
 									path=":channelId?/contacts/accounts/:id/*"
+								/>
+							)}
+
+							{LDPEnabled && (
+								<Route
+									element={
+										<BundleRouter
+											data={CampaignsDashboard}
+											destructured={false}
+										/>
+									}
+									path=":channelId?/campaigns"
+								/>
+							)}
+
+							{LDPEnabled && (
+								<Route
+									element={
+										<BundleRouter
+											data={CampaignDetail}
+											destructured={false}
+										/>
+									}
+									path=":channelId?/campaigns/:id"
 								/>
 							)}
 

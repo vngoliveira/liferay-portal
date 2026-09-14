@@ -100,6 +100,8 @@ export interface IDataSet {
 	restApplication: string;
 	restEndpoint: string;
 	restSchema: string;
+	searchAsYouType?: boolean;
+	searchSuggestionsEnabled?: boolean;
 	showSearch: boolean;
 	snapshotsEnabled: boolean;
 	sortsOrder?: string;

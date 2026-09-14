@@ -6,6 +6,7 @@
 package com.liferay.portal.verify.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
+import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.jdbc.DataAccess;
 import com.liferay.portal.kernel.log.Log;
@@ -36,7 +37,6 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -66,11 +66,16 @@ public class VerifyLayoutTest extends BaseVerifyProcessTestCase {
 		_errorMessages = new ArrayList<>();
 
 		for (String keyword : PropsValues.LAYOUT_FRIENDLY_URL_KEYWORDS) {
-			if (!keyword.contains(StringPool.STAR) &&
-				!keyword.contains(StringPool.UNDERLINE)) {
+			if (keyword.contains(StringPool.STAR) ||
+				keyword.contains(StringPool.UNDERLINE)) {
 
+				continue;
+			}
+
+			if (_keyword1 == null) {
 				_keyword1 = keyword;
-
+			}
+			else {
 				_keyword2 = keyword;
 
 				break;
@@ -123,7 +128,6 @@ public class VerifyLayoutTest extends BaseVerifyProcessTestCase {
 			_errorMessages.toString(), 0, _errorMessages.size());
 	}
 
-	@Ignore
 	@Test
 	public void testVerifyLayoutsWithReservedLayoutFriendlyURLs()
 		throws Exception {
@@ -135,16 +139,21 @@ public class VerifyLayoutTest extends BaseVerifyProcessTestCase {
 
 		super.testVerify();
 
-		Assert.assertEquals(
-			_errorMessages.toString(), 2, _errorMessages.size());
+		String errorMessages = _errorMessages.toString();
 
-		String errorMessage1 = _errorMessages.get(0);
-
-		String errorMessage2 = _errorMessages.get(1);
-
-		Assert.assertTrue(errorMessage1.contains(_keyword1));
-
-		Assert.assertTrue(errorMessage2.contains(_keyword2));
+		Assert.assertTrue(
+			errorMessages,
+			errorMessages.contains(
+				StringBundler.concat(
+					StringPool.QUOTE, StringPool.FORWARD_SLASH, _keyword1,
+					StringPool.QUOTE)));
+		Assert.assertTrue(
+			errorMessages,
+			errorMessages.contains(
+				StringBundler.concat(
+					StringPool.QUOTE, StringPool.FORWARD_SLASH, _keyword2,
+					StringPool.QUOTE)));
+		Assert.assertEquals(errorMessages, 2, _errorMessages.size());
 	}
 
 	@Test

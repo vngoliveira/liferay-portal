@@ -1,6 +1,7 @@
 import IndividualsDataSet, {getVisitorType} from '../IndividualsDataSet';
 import React from 'react';
 import {cleanup, render, screen} from '@testing-library/react';
+import {warmFrontendDataSet} from 'test/warm-frontend-data-set';
 
 jest.unmock('react-dom');
 
@@ -21,6 +22,8 @@ jest.mock('react-router-dom', () => ({
 	useLocation: () => ({search: mockSearch}),
 	useParams: () => ({channelId: '456', groupId: '23', id: 'acc-1'}),
 }));
+
+beforeAll(warmFrontendDataSet);
 
 describe('IndividualsDataSet', () => {
 	beforeEach(() => {
@@ -64,15 +67,15 @@ describe('IndividualsDataSet', () => {
 		);
 	});
 
-	it('should request the bounds of a custom range', () => {
+	it('should request a custom range by its bounds alone', () => {
 		mockSearch =
 			'?rangeEnd=2026-02-20&rangeKey=CUSTOM&rangeStart=2026-02-10';
 
 		render(<IndividualsDataSet />);
 
-		expect(lastFDSProps.apiURL).toContain('rangeEnd=2026-02-20');
-		expect(lastFDSProps.apiURL).toContain('rangeKey=CUSTOM');
-		expect(lastFDSProps.apiURL).toContain('rangeStart=2026-02-10');
+		expect(lastFDSProps.apiURL).toBe(
+			'/o/faro/contacts/23/account/acc-1/individuals?channelId=456&rangeEnd=2026-02-20&rangeStart=2026-02-10'
+		);
 	});
 
 	it('should tell an empty result apart by the selected period', () => {
@@ -103,10 +106,10 @@ describe('IndividualsDataSet', () => {
 			);
 		});
 
-		it('should request only three individuals', () => {
+		it('should request only five individuals', () => {
 			render(<IndividualsDataSet preview />);
 
-			expect(lastFDSProps.views[0].initialPaginationDelta).toBe(3);
+			expect(lastFDSProps.views[0].initialPaginationDelta).toBe(5);
 		});
 
 		it('should hide the management bar, the search and the pagination', () => {

@@ -159,7 +159,34 @@ public class AssetListTypePropertiesUtilTest {
 	}
 
 	@Test
-	public void testGetTypePropertiesJSONArrayEmitsSortableFlag() {
+	public void testGetTypePropertiesJSONArrayEmitsSortableFlagsForCommonFields() {
+		JSONArray jsonArray =
+			AssetListTypePropertiesUtil.getTypePropertiesJSONArray(
+				new long[0], new long[0], _COMPANY_ID, LocaleUtil.US);
+
+		JSONObject groupJSONObject = jsonArray.getJSONObject(0);
+
+		JSONArray itemsJSONArray = groupJSONObject.getJSONArray("items");
+
+		for (int i = 0; i < itemsJSONArray.length(); i++) {
+			JSONObject itemJSONObject = itemsJSONArray.getJSONObject(i);
+
+			String name = itemJSONObject.getString("name");
+
+			boolean expectedSortable = true;
+
+			if (name.equals("externalReferenceCode")) {
+				expectedSortable = false;
+			}
+
+			Assert.assertEquals(
+				itemJSONObject.toString(), expectedSortable,
+				itemJSONObject.getBoolean("sortable"));
+		}
+	}
+
+	@Test
+	public void testGetTypePropertiesJSONArrayEmitsSortableFlagsForObjectFields() {
 		_setUpObjectDefinition(
 			_CLASS_NAME_ID_1, _LABEL_1,
 			Arrays.asList(
@@ -376,14 +403,14 @@ public class AssetListTypePropertiesUtilTest {
 		JSONArray itemsJSONArray = groupJSONObject.getJSONArray("items");
 
 		Assert.assertEquals(
-			itemsJSONArray.toString(), 12, itemsJSONArray.length());
+			itemsJSONArray.toString(), 11, itemsJSONArray.length());
 
 		Set<String> actualNames = JSONUtil.toStringSet(itemsJSONArray, "name");
 
 		String[] expectedNames = {
 			Field.CREATE_DATE, Field.DISPLAY_DATE, Field.EXPIRATION_DATE,
 			Field.MODIFIED_DATE, Field.PRIORITY, Field.PUBLISH_DATE,
-			Field.REVIEW_DATE, Field.STATUS, Field.TITLE, Field.USER_NAME,
+			Field.REVIEW_DATE, Field.TITLE, Field.USER_NAME,
 			"externalReferenceCode", "viewCount"
 		};
 

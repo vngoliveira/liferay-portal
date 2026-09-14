@@ -2,13 +2,13 @@
 
 ## Trigger
 
-Always. The bnd baseline task diffs each exported API against the last release and fails on a missing, excessive, or insufficient `Bundle-Version` or `packageinfo` bump.
+Always, apart from a diff confined to the trees **Match** excludes. None of those trees can require a version bump. The bnd baseline task diffs each exported API against the last release and fails on a missing, excessive, or insufficient `Bundle-Version` or `packageinfo` bump. `maven-executor` is the one module under `modules/test` the baseline task actually runs, so it stays selected.
 
 Do not narrow the run to the branch diff. The comparison target is resolved from Nexus on every run, so a module the branch never touched can start failing between one run and the next. Narrow the verdict instead, as **Command** sets out: only a module the branch changed can fail it. Otherwise one stale version on master fails every pull request at once, stopping the developer least able to judge whether the bump is right.
 
 ## Match
 
-`.`
+`. &! ^modules/test/jenkins-results-parser/|^modules/test/playwright/|^modules/test/poshi/|^portal-web/test/`
 
 ## Command
 
@@ -55,6 +55,8 @@ git diff --name-only "${MERGE_BASE}...HEAD"
 `baseline-all` compares those too, and they are where a branch's changes land, so confirming only the seven leaves the half that matters unevidenced. A module builds its dependencies first and so reports an aggregate count rather than `1 executed`. Judge it by the `> Task :<path>:baseline` line, which a run that never compared anything does not print.
 
 A finding in a module the branch changed is the branch's to resolve, and **Autocommit** below decides which kind is repaired and passes and which fails. A finding in any other module is **inherited**: report it with both versions and do not fail the branch, whatever its severity. Identify the finding's module from the failed task's Gradle path, since module depth varies and deriving module directories from the diff lands on the app group instead.
+
+Return the verdict with its comparison universe named — `PASS (baseline-all + seven Ant projects + <count> changed exporting modules)` — so a run that compared less than the whole says so in the cell that gates and reviewers read, not in a note beneath it. A verdict whose universe does not include `baseline-all` is **NOT VERIFIED**.
 
 ### Interpretation
 

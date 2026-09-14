@@ -51,7 +51,7 @@ public abstract class BaseOrderTypeResourceImpl implements OrderTypeResource {
 			@io.swagger.v3.oas.annotations.Parameter(
 				description = "Internal numeric identifier of the target discount-order-type binding. Server-assigned and stable across the resource's lifetime.",
 				in = io.swagger.v3.oas.annotations.enums.ParameterIn.PATH,
-				name = "discountOrderTypeId"
+				name = "discountOrderTypeId", required = true
 			)
 		}
 	)
@@ -80,14 +80,14 @@ public abstract class BaseOrderTypeResourceImpl implements OrderTypeResource {
 	 * curl -X 'GET' 'http://localhost:8080/o/headless-commerce-admin-pricing/v2.0/price-list-order-types/{priceListOrderTypeId}/order-type'  -u 'test@liferay.com:test'
 	 */
 	@io.swagger.v3.oas.annotations.Operation(
-		description = "Returns the OrderType nested in a PriceListOrderType (via price list order type link) addressed by internal rel id."
+		description = "Returns the OrderType nested in a PriceListOrderType (via price list order type link) addressed by internal rel ID."
 	)
 	@io.swagger.v3.oas.annotations.Parameters(
 		value = {
 			@io.swagger.v3.oas.annotations.Parameter(
 				description = "Internal numeric identifier of the target price-list-order-type binding. Server-assigned and stable across the resource's lifetime.",
 				in = io.swagger.v3.oas.annotations.enums.ParameterIn.PATH,
-				name = "priceListOrderTypeId"
+				name = "priceListOrderTypeId", required = true
 			)
 		}
 	)
@@ -555,4 +555,4 @@ public abstract class BaseOrderTypeResourceImpl implements OrderTypeResource {
 		LogFactoryUtil.getLog(BaseOrderTypeResourceImpl.class);
 
 }
-// LIFERAY-REST-BUILDER-HASH:881435828
+// LIFERAY-REST-BUILDER-HASH:-414261936

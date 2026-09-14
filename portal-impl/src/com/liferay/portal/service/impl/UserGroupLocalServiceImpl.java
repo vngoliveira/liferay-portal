@@ -81,7 +81,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -395,6 +394,29 @@ public class UserGroupLocalServiceImpl extends UserGroupLocalServiceBaseImpl {
 	}
 
 	/**
+	 * Removes the user from all user groups.
+	 *
+	 * @param userId the primary key of the user
+	 */
+	@Override
+	public void clearUserUserGroups(long userId) {
+		List<UserGroup> userGroups = getUserUserGroups(userId);
+
+		super.clearUserUserGroups(userId);
+
+		try {
+			reindex(userId);
+
+			for (UserGroup userGroup : userGroups) {
+				reindexUserGroup(userGroup);
+			}
+		}
+		catch (PortalException portalException) {
+			throw new SystemException(portalException);
+		}
+	}
+
+	/**
 	 * Deletes the user group.
 	 *
 	 * @param  userGroupId the primary key of the user group
@@ -468,6 +490,81 @@ public class UserGroupLocalServiceImpl extends UserGroupLocalServiceBaseImpl {
 
 		for (UserGroup userGroup : userGroups) {
 			userGroupLocalService.deleteUserGroup(userGroup);
+		}
+	}
+
+	/**
+	 * Removes the user from the user group.
+	 *
+	 * @param userId the primary key of the user
+	 * @param userGroupId the primary key of the user group
+	 */
+	@Override
+	public void deleteUserUserGroup(long userId, long userGroupId) {
+		try {
+			userGroupLocalService.deleteUserUserGroup(
+				userId, getUserGroup(userGroupId));
+		}
+		catch (PortalException portalException) {
+			throw new SystemException(portalException);
+		}
+	}
+
+	/**
+	 * Removes the user from the user group.
+	 *
+	 * @param userId the primary key of the user
+	 * @param userGroup the user group
+	 */
+	@Override
+	public void deleteUserUserGroup(long userId, UserGroup userGroup) {
+		super.deleteUserUserGroup(userId, userGroup);
+
+		try {
+			reindex(userId);
+			reindexUserGroup(userGroup);
+		}
+		catch (PortalException portalException) {
+			throw new SystemException(portalException);
+		}
+	}
+
+	/**
+	 * Removes the user from the user groups.
+	 *
+	 * @param userId the primary key of the user
+	 * @param userGroups the user groups
+	 */
+	@Override
+	public void deleteUserUserGroups(long userId, List<UserGroup> userGroups) {
+		super.deleteUserUserGroups(userId, userGroups);
+
+		try {
+			reindex(userId);
+
+			for (UserGroup userGroup : userGroups) {
+				reindexUserGroup(userGroup);
+			}
+		}
+		catch (PortalException portalException) {
+			throw new SystemException(portalException);
+		}
+	}
+
+	/**
+	 * Removes the user from the user groups.
+	 *
+	 * @param userId the primary key of the user
+	 * @param userGroupIds the primary keys of the user groups
+	 */
+	@Override
+	public void deleteUserUserGroups(long userId, long[] userGroupIds) {
+		try {
+			userGroupLocalService.deleteUserUserGroups(
+				userId, getUserGroups(userGroupIds));
+		}
+		catch (PortalException portalException) {
+			throw new SystemException(portalException);
 		}
 	}
 
@@ -1068,12 +1165,6 @@ public class UserGroupLocalServiceImpl extends UserGroupLocalServiceBaseImpl {
 	public UserGroup updateExternalReferenceCode(
 			UserGroup userGroup, String externalReferenceCode)
 		throws PortalException {
-
-		if (Objects.equals(
-				userGroup.getExternalReferenceCode(), externalReferenceCode)) {
-
-			return userGroup;
-		}
 
 		_validateExternalReferenceCode(
 			userGroup.getUserGroupId(), externalReferenceCode);

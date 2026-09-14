@@ -9,7 +9,7 @@ import {useControlledState} from '@clayui/shared';
 import {useIsMounted, useThunk} from '@liferay/frontend-js-react-web';
 import {useLiferayState} from '@liferay/frontend-js-state-web/react';
 import classNames from 'classnames';
-import {openToast} from 'frontend-js-components-web';
+import {openToast, useStableCallback} from 'frontend-js-components-web';
 import {
 	ClientExtensionDefinition,
 	ClientExtensionResolution,
@@ -71,6 +71,7 @@ import {loadData} from './utils/loadData';
 // @ts-ignore
 
 import {logError} from './utils/logError';
+import recentSearches from './utils/recentSearches';
 import {transformAdditionalAPIURLParameters} from './utils/transformAdditionalAPIURLParameters';
 import transformDataSetItems from './utils/transformDataSetItems';
 import {
@@ -140,6 +141,8 @@ const FrontendDataSetContent = ({
 	overrideEmptyResultView,
 	pagination,
 	portletId,
+	searchAsYouType = false,
+	searchSuggestionsEnabled = false,
 	selectedItems: externalSelectedItems,
 	selectedItemsKey = 'id',
 	selectionType,
@@ -657,56 +660,69 @@ const FrontendDataSetContent = ({
 		!!items?.length &&
 		!!total;
 
-	const requestData = useCallback(() => {
-		if (!apiURL) {
-			return;
-		}
+	const requestIdRef = useRef(0);
 
-		const unfrozenGlobalFDSState: IFDSState = deepClone(globalFDSState);
+	const requestData = useCallback(
+		(signal?: AbortSignal) => {
+			if (!apiURL) {
+				return;
+			}
 
-		const activeFilters: Array<IBaseFilterState> =
-			unfrozenGlobalFDSState.filters.filter((filter) => filter.active) ||
-			[];
+			const unfrozenGlobalFDSState: IFDSState = deepClone(globalFDSState);
 
-		const activeFiltersOdataStrings = activeFilters.map((filter) => {
-			const filterImplementation = FILTER_IMPLEMENTATIONS[filter.type];
+			const activeFilters: Array<IBaseFilterState> =
+				unfrozenGlobalFDSState.filters.filter(
+					(filter) => filter.active
+				) || [];
 
-			return filterImplementation.getOdataString(filter);
-		});
+			const activeFiltersOdataStrings = activeFilters.map((filter) => {
+				const filterImplementation =
+					FILTER_IMPLEMENTATIONS[filter.type];
 
-		const activeSorts =
-			sorts.length > 1
-				? sorts.filter((sort: TSort) => sort.active)
-				: sorts;
+				return filterImplementation.getOdataString(filter);
+			});
 
-		const loadDataArgs = {
+			const activeSorts =
+				sorts.length > 1
+					? sorts.filter((sort: TSort) => sort.active)
+					: sorts;
+
+			const loadDataArgs = {
+				additionalAPIURLParameters,
+				apiURL,
+				currentURL,
+				delta: paginationDelta,
+				odataFiltersStrings: activeFiltersOdataStrings,
+				page: pageNumber,
+				searchParam: unfrozenGlobalFDSState.search.query,
+				sorts: activeSorts,
+			};
+
+			const requestId = ++requestIdRef.current;
+
+			return loadData({
+				...loadDataArgs,
+				additionalAPIURLParameters: transformAdditionalAPIURLParameters(
+					loadDataArgs,
+					additionalAPIURLParametersTransformer
+				),
+				signal,
+			}).then((response) => ({
+				...response,
+				stale: requestId !== requestIdRef.current,
+			}));
+		},
+		[
 			additionalAPIURLParameters,
+			additionalAPIURLParametersTransformer,
 			apiURL,
 			currentURL,
-			delta: paginationDelta,
-			odataFiltersStrings: activeFiltersOdataStrings,
-			page: pageNumber,
-			searchParam: unfrozenGlobalFDSState.search.query,
-			sorts: activeSorts,
-		};
-
-		return loadData({
-			...loadDataArgs,
-			additionalAPIURLParameters: transformAdditionalAPIURLParameters(
-				loadDataArgs,
-				additionalAPIURLParametersTransformer
-			),
-		});
-	}, [
-		additionalAPIURLParameters,
-		additionalAPIURLParametersTransformer,
-		apiURL,
-		currentURL,
-		globalFDSState,
-		pageNumber,
-		paginationDelta,
-		sorts,
-	]);
+			globalFDSState,
+			pageNumber,
+			paginationDelta,
+			sorts,
+		]
+	);
 
 	const onClearFilters = useCallback(() => {
 		const unfrozenGlobalFDSState: IFDSState = deepClone(globalFDSState);
@@ -807,6 +823,40 @@ const FrontendDataSetContent = ({
 		viewsDispatch,
 	]);
 
+	// A response is only ever applied when it is the newest one, so the query
+	// held here is the one it answers
+
+	const searchQueryRef = useRef<string>();
+
+	searchQueryRef.current = globalFDSState.search.query;
+
+	// A query is only worth remembering once its results are known, so the
+	// history is written where a response is applied rather than when the user
+	// submits. The count comes off that response, because reading it from state
+	// would judge the query by the results of the one before it.
+
+	const recordSearch = useCallback(
+		(totalCount: number) => {
+			if (!searchSuggestionsEnabled) {
+				return;
+			}
+
+			const query = (searchQueryRef.current ?? '').trim();
+
+			if (!query) {
+				return;
+			}
+
+			if (totalCount) {
+				recentSearches.add(id, query);
+			}
+			else {
+				recentSearches.remove(id, query);
+			}
+		},
+		[id, searchSuggestionsEnabled]
+	);
+
 	const updateDataSetItems = useCallback(
 		(dataSetData: IDataSetData) => {
 			const transformedItems = transformDataSetItems(dataSetData.items);
@@ -814,13 +864,15 @@ const FrontendDataSetContent = ({
 			setItems(transformedItems);
 			setTotal(dataSetData.totalCount);
 
+			recordSearch(dataSetData.totalCount);
+
 			if (!dataSetData.items.length && dataSetData.totalCount > 0) {
 				viewsDispatch(updatePageNumber(dataSetData.lastPage));
 			}
 
 			return transformedItems;
 		},
-		[updatePageNumber, viewsDispatch]
+		[recordSearch, updatePageNumber, viewsDispatch]
 	);
 
 	useEffect(() => {
@@ -1287,7 +1339,7 @@ const FrontendDataSetContent = ({
 			setDataLoading(true);
 
 			return requestData()!
-				.then(({data}) => {
+				.then(({data, stale}) => {
 					if (successNotification?.showSuccessNotification) {
 						openToast({
 							message:
@@ -1297,7 +1349,7 @@ const FrontendDataSetContent = ({
 						});
 					}
 
-					if (isMounted()) {
+					if (isMounted() && !stale) {
 						const updatedItems = updateDataSetItems(data);
 
 						setSelectedItems(
@@ -1399,10 +1451,16 @@ const FrontendDataSetContent = ({
 			return;
 		}
 
+		const abortController = new AbortController();
+
 		setDataLoading(true);
 
-		requestData()!.then(({data, ok, status: statusCode}) => {
-			if (isMounted()) {
+		requestData(abortController.signal)!
+			.then(({data, ok, stale, status: statusCode}) => {
+				if (!isMounted() || stale) {
+					return;
+				}
+
 				if (!ok) {
 					handleApiError({data, statusCode});
 				}
@@ -1430,8 +1488,22 @@ const FrontendDataSetContent = ({
 				setDataLoading(false);
 
 				setSearching(false);
-			}
-		});
+			})
+			.catch((error) => {
+
+				// An aborted request is always followed by a newer one, which
+				// takes over the loading state
+
+				if (error.name === 'AbortError' || !isMounted()) {
+					return;
+				}
+
+				setDataLoading(false);
+
+				setSearching(false);
+			});
+
+		return () => abortController.abort();
 	}, [
 		apiURL,
 		globalFDSStateInitialized,
@@ -1793,6 +1865,24 @@ const FrontendDataSetContent = ({
 
 	const unfrozenGlobalFDSState: IFDSState = deepClone(globalFDSState);
 
+	// Consumers debounce this callback, so it keeps a stable identity and
+	// always reaches the current state
+
+	const handleSearch = useStableCallback(({query}: {query: string}) => {
+		skipSnapshotsUpdatedChangeRef.current = true;
+
+		setGlobalFDSState({
+			...unfrozenGlobalFDSState,
+			search: {
+				query,
+			},
+		});
+
+		if (query !== unfrozenGlobalFDSState.search.query) {
+			viewsDispatch(updatePageNumber(1));
+		}
+	});
+
 	const handleSnapshotChange = ({defaultSnapshot, snapshots, value}: any) => {
 		if (value === 'DEFAULT_VIEW') {
 			updateConfigInURL({
@@ -2067,16 +2157,7 @@ const FrontendDataSetContent = ({
 					setInfoPanelOpen((value) => !value);
 				},
 				onItemsChange,
-				onSearch: ({query}) => {
-					skipSnapshotsUpdatedChangeRef.current = true;
-
-					setGlobalFDSState({
-						...unfrozenGlobalFDSState,
-						search: {
-							query,
-						},
-					});
-				},
+				onSearch: handleSearch,
 				onSnapshotChange: handleSnapshotChange,
 				onViewChange: (viewName: string) => {
 					const view = views.find(({name}) => name === viewName);
@@ -2128,7 +2209,9 @@ const FrontendDataSetContent = ({
 				openModal,
 				openSidePanel,
 				portletId,
+				searchAsYouType,
 				searchParam: unfrozenGlobalFDSState.search.query,
+				searchSuggestionsEnabled,
 				searching,
 				selectable,
 				selectedItems,

@@ -33,8 +33,6 @@ import com.liferay.portal.kernel.backgroundtask.constants.BackgroundTaskConstant
 import com.liferay.portal.kernel.backgroundtask.display.BackgroundTaskDisplayFactory;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.RestrictionsFactoryUtil;
-import com.liferay.portal.kernel.json.JSONFactory;
-import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.messaging.DestinationNames;
 import com.liferay.portal.kernel.model.Group;
@@ -420,18 +418,9 @@ public class PublishProcessResourceImpl extends BasePublishProcessResourceImpl {
 				setDateCreated(backgroundTask::getCreateDate);
 				setDateModified(backgroundTask::getModifiedDate);
 				setErrorMessage(
-					() -> {
-						JSONObject jsonObject =
-							_jsonFactory.safeCreateJSONObject(
-								backgroundTask.getStatusMessage(), true);
-
-						if (jsonObject == null) {
-							return backgroundTask.getStatusMessage();
-						}
-
-						return jsonObject.getString(
-							"message", backgroundTask.getStatusMessage());
-					});
+					() -> BackgroundTaskUtil.getErrorMessage(
+						backgroundTask,
+						contextAcceptLanguage.getPreferredLocale()));
 				setId(backgroundTask::getBackgroundTaskId);
 				setName(
 					() ->
@@ -516,9 +505,6 @@ public class PublishProcessResourceImpl extends BasePublishProcessResourceImpl {
 
 	@Reference
 	private ExportImportHelper _exportImportHelper;
-
-	@Reference
-	private JSONFactory _jsonFactory;
 
 	@Reference
 	private Language _language;

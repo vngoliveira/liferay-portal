@@ -253,6 +253,40 @@
 				{
 					"DBType": "Boolean",
 					"businessType": "Boolean",
+					"defaultValue": false,
+					"externalReferenceCode": "SEARCH_AS_YOU_TYPE",
+					"indexed": true,
+					"indexedAsKeyword": false,
+					"label": {
+						"en_US": "Search as You Type"
+					},
+					"localized": false,
+					"name": "searchAsYouType",
+					"required": false,
+					"state": false,
+					"system": true,
+					"type": "Boolean"
+				},
+				{
+					"DBType": "Boolean",
+					"businessType": "Boolean",
+					"defaultValue": false,
+					"externalReferenceCode": "SEARCH_SUGGESTIONS_ENABLED",
+					"indexed": true,
+					"indexedAsKeyword": false,
+					"label": {
+						"en_US": "Search Suggestions Enabled"
+					},
+					"localized": false,
+					"name": "searchSuggestionsEnabled",
+					"required": false,
+					"state": false,
+					"system": true,
+					"type": "Boolean"
+				},
+				{
+					"DBType": "Boolean",
+					"businessType": "Boolean",
 					"defaultValue": true,
 					"externalReferenceCode": "SHOW_SEARCH",
 					"indexed": true,

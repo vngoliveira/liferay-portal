@@ -8,6 +8,7 @@ import {
 	FDS_EVENT,
 	IInternalRenderer,
 	IView,
+	getItemActionURL,
 } from '@liferay/frontend-data-set-web';
 import {addOnClickToCreationMenuItems} from '@liferay/site-cms-site-initializer';
 import React from 'react';
@@ -19,10 +20,12 @@ import {
 } from '../../utils/cmpTabPersistence';
 import {WORKFLOW_TASK_ACTION_LINK_ID} from '../../utils/constants';
 import {openCMPModal} from '../../utils/openCMPModal';
+import {transformFDSBulkActions} from '../../utils/transformFDSBulkActions';
 import {TaskAction, WorkflowTaskItemData} from '../../utils/types';
 import WORKFLOW_TASK_MODALS from '../../utils/workflowTaskModals';
 import BulkEditWorkflowAssigneeModalContent from '../modal/BulkEditWorkflowAssigneeModalContent';
 import BulkEditWorkflowDueDateModalContent from '../modal/BulkEditWorkflowDueDateModalContent';
+import BulkUpdateWorkflowStateModalContent from '../modal/BulkUpdateWorkflowStateModalContent';
 import ACTIONS from './actions/creationMenuActions';
 import {cmpWorkflowTasksFDSAtom} from './atoms';
 import WorkflowStateRenderer from './cell_renderers/WorkflowStateRenderer';
@@ -30,16 +33,24 @@ import WorkflowTaskActionLinkRenderer from './cell_renderers/WorkflowTaskActionL
 
 type BulkModalProps = {
 	closeModal: () => void;
+	getTaskURL: (task: WorkflowTaskItemData) => string;
 	loadData: () => void;
 	selectedData: any;
 };
 
 const BULK_ACTION_MODALS: Record<
 	string,
-	React.ComponentType<BulkModalProps>
+	{
+		contentComponent: React.ComponentType<BulkModalProps>;
+		size?: 'lg' | 'sm';
+	}
 > = {
-	'assign-to': BulkEditWorkflowAssigneeModalContent,
-	'update-due-date': BulkEditWorkflowDueDateModalContent,
+	'assign-to': {contentComponent: BulkEditWorkflowAssigneeModalContent},
+	'update-due-date': {contentComponent: BulkEditWorkflowDueDateModalContent},
+	'update-state': {
+		contentComponent: BulkUpdateWorkflowStateModalContent,
+		size: 'lg',
+	},
 };
 
 export default function WorkflowTasksFDSPropsTransformer({
@@ -72,13 +83,28 @@ export default function WorkflowTasksFDSPropsTransformer({
 	return {
 		...otherProps,
 		atom: cmpWorkflowTasksFDSAtom,
-		bulkActions: bulkActions.map((action) => ({
+		bulkActions: transformFDSBulkActions(bulkActions).map((action) => ({
 			...action,
 			isDisabled: ({
 				allItemsSelectedActive,
+				selectedItems = [],
 			}: {
 				allItemsSelectedActive: boolean;
-			}) => allItemsSelectedActive,
+				selectedItems?: WorkflowTaskItemData[];
+			}) => {
+				if (allItemsSelectedActive) {
+					return true;
+				}
+
+				if (action?.data?.id !== 'update-state') {
+					return false;
+				}
+
+				return !selectedItems.every(
+					({embedded}) =>
+						embedded?.assignedToMe && !embedded?.completed
+				);
+			},
 		})),
 		creationMenu: creationMenu && {
 			...creationMenu,
@@ -176,11 +202,13 @@ export default function WorkflowTasksFDSPropsTransformer({
 			action: any;
 			selectedData: any;
 		}) => {
-			const ContentComponent = BULK_ACTION_MODALS[action?.data?.id];
+			const modal = BULK_ACTION_MODALS[action?.data?.id];
 
-			if (!ContentComponent) {
+			if (!modal) {
 				return;
 			}
+
+			const {contentComponent: ContentComponent, size} = modal;
 
 			const loadData = () => Liferay.fire(FDS_EVENT.UPDATE_DISPLAY, {id});
 
@@ -189,11 +217,18 @@ export default function WorkflowTasksFDSPropsTransformer({
 				contentComponent: ({closeModal}: {closeModal: () => void}) => (
 					<ContentComponent
 						closeModal={closeModal}
+						getTaskURL={(task: WorkflowTaskItemData) =>
+							getItemActionURL(
+								itemsActions,
+								WORKFLOW_TASK_ACTION_LINK_ID,
+								task
+							)
+						}
 						loadData={loadData}
 						selectedData={selectedData}
 					/>
 				),
-				size: 'md',
+				size,
 			});
 		},
 		views: nonDefaultViews,

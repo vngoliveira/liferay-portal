@@ -83,7 +83,7 @@ public abstract class BaseBatchTestEntityResourceImpl
 		value = {
 			@io.swagger.v3.oas.annotations.Parameter(
 				in = io.swagger.v3.oas.annotations.enums.ParameterIn.PATH,
-				name = "externalReferenceCode"
+				name = "externalReferenceCode", required = true
 			)
 		}
 	)
@@ -111,6 +111,14 @@ public abstract class BaseBatchTestEntityResourceImpl
 	 *
 	 * curl -X 'GET' 'http://localhost:8080/o/portal-tools-rest-builder-test/v1.0/batch-test-entities'  -u 'test@liferay.com:test'
 	 */
+	@io.swagger.v3.oas.annotations.Parameters(
+		value = {
+			@io.swagger.v3.oas.annotations.Parameter(
+				in = io.swagger.v3.oas.annotations.enums.ParameterIn.QUERY,
+				name = "nestedFieldsDepth"
+			)
+		}
+	)
 	@io.swagger.v3.oas.annotations.tags.Tags(
 		value = {
 			@io.swagger.v3.oas.annotations.tags.Tag(name = "BatchTestEntity")
@@ -134,7 +142,7 @@ public abstract class BaseBatchTestEntityResourceImpl
 			@io.swagger.v3.oas.annotations.Parameter(
 				description = "Numeric identifier of the Batch Test Entity to act on. Obtain the value from the `id` field of any entity returned by `GET /batch-test-entities` or by a prior create call. The value is a 64-bit signed integer, unique within the portal instance.",
 				in = io.swagger.v3.oas.annotations.enums.ParameterIn.PATH,
-				name = "batchTestEntityId"
+				name = "batchTestEntityId", required = true
 			)
 		}
 	)
@@ -166,7 +174,7 @@ public abstract class BaseBatchTestEntityResourceImpl
 		value = {
 			@io.swagger.v3.oas.annotations.Parameter(
 				in = io.swagger.v3.oas.annotations.enums.ParameterIn.PATH,
-				name = "externalReferenceCode"
+				name = "externalReferenceCode", required = true
 			)
 		}
 	)
@@ -333,7 +341,7 @@ public abstract class BaseBatchTestEntityResourceImpl
 		value = {
 			@io.swagger.v3.oas.annotations.Parameter(
 				in = io.swagger.v3.oas.annotations.enums.ParameterIn.PATH,
-				name = "externalReferenceCode"
+				name = "externalReferenceCode", required = true
 			)
 		}
 	)
@@ -1095,4 +1103,4 @@ public abstract class BaseBatchTestEntityResourceImpl
 		LogFactoryUtil.getLog(BaseBatchTestEntityResourceImpl.class);
 
 }
-// LIFERAY-REST-BUILDER-HASH:-1964683350
+// LIFERAY-REST-BUILDER-HASH:-411930736

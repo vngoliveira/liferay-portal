@@ -1,16 +1,13 @@
 ext.faroEnvironmentName = System.getenv().get("FARO_ENVIRONMENT_NAME") ?: "local"
 ext.faroImageTag = project.findProperty("docker.image.tag") ?: "latest"
 
-// Pin service builder to the last version compatible with release.dxp.api:2026.q1.5.
-// Versions >= 1.0.530 generate CollectionPersistenceFinder which is not in that API.
+configurations {
+	faroLoggingDependencies
+}
 
-subprojects {
-	plugins.withId("com.liferay.portal.tools.service.builder") {
-		configurations.serviceBuilder {
-			resolutionStrategy {
-				force "com.liferay:com.liferay.portal.tools.service.builder:1.0.529"
-			}
-		}
+dependencies {
+	faroLoggingDependencies(group: "org.apache.logging.log4j", name: "log4j-layout-template-json", version: "2.17.1") {
+		transitive = false
 	}
 }
 
@@ -69,6 +66,14 @@ dockerDeploy {
 			copy {
 				from "modules/osb-faro-docker/cloud"
 				into "${buildDir}/docker/docker"
+			}
+
+			copy {
+				from configurations.faroLoggingDependencies
+				into "${buildDir}/docker/docker/resources"
+				rename {
+					"log4j-layout-template-json.jar"
+				}
 			}
 		}
 

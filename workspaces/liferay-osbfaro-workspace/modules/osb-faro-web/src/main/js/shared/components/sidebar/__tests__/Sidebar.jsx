@@ -74,6 +74,33 @@ describe('Sidebar', () => {
 		expect(queryByText('Accounts')).toBeTruthy();
 	});
 
+	it('should render the campaigns item when LDP is enabled', () => {
+		const {queryByText} = render(
+			<Provider store={mockStore(mockStoreDataLDP)}>
+				<MemoryRouter>
+					<Sidebar {...defaultProps} />
+				</MemoryRouter>
+			</Provider>
+		);
+
+		expect(queryByText('Campaigns').closest('a')).toHaveAttribute(
+			'href',
+			'/workspace/23/123/campaigns'
+		);
+	});
+
+	it('should not render the campaigns item when LDP is not enabled', () => {
+		const {queryByText} = render(
+			<Provider store={mockStore()}>
+				<MemoryRouter>
+					<Sidebar {...defaultProps} />
+				</MemoryRouter>
+			</Provider>
+		);
+
+		expect(queryByText('Campaigns')).toBeNull();
+	});
+
 	it('should not render lifecycle and accounts items when LDP is not enabled', () => {
 		const {queryByText} = render(
 			<Provider store={mockStore()}>
