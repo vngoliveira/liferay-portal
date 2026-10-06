@@ -573,6 +573,8 @@ public class WebServerServlet extends HttpServlet {
 						DLAppLocalServiceUtil.getFileEntryByUuidAndGroupId(
 							uuid, groupId);
 
+					_checkFileEntry(fileEntry, httpServletRequest);
+
 					image = convertFileEntry(igSmallImage, fileEntry);
 				}
 				catch (Exception exception) {
@@ -710,7 +712,9 @@ public class WebServerServlet extends HttpServlet {
 				organization = organizations.get(0);
 			}
 
-			if (organization != null) {
+			if ((organization != null) &&
+				!_isLayoutSetLogo(httpServletRequest, imageId)) {
+
 				String organizationUuidDigest = DigesterUtil.digest(
 					organization.getUuid());
 
@@ -971,8 +975,8 @@ public class WebServerServlet extends HttpServlet {
 				String title = name;
 
 				sendFile(
-					httpServletResponse, user, groupId, folderId,
-					URLCodec.decodeURL(title));
+					httpServletRequest, httpServletResponse, user, groupId,
+					folderId, URLCodec.decodeURL(title));
 
 				return;
 			}
@@ -980,7 +984,8 @@ public class WebServerServlet extends HttpServlet {
 
 		try {
 			sendFile(
-				httpServletResponse, user, groupId, folderId, "index.html");
+				httpServletRequest, httpServletResponse, user, groupId,
+				folderId, "index.html");
 
 			return;
 		}
@@ -991,7 +996,8 @@ public class WebServerServlet extends HttpServlet {
 
 			try {
 				sendFile(
-					httpServletResponse, user, groupId, folderId, "index.htm");
+					httpServletRequest, httpServletResponse, user, groupId,
+					folderId, "index.htm");
 
 				return;
 			}
@@ -1034,6 +1040,37 @@ public class WebServerServlet extends HttpServlet {
 
 		sendHTML(
 			httpServletResponse, URLCodec.decodeURL(path), webServerEntries);
+	}
+
+	protected void sendFile(
+			HttpServletRequest httpServletRequest,
+			HttpServletResponse httpServletResponse, User user, long groupId,
+			long folderId, String title)
+		throws Exception {
+
+		FileEntry fileEntry = DLAppLocalServiceUtil.getFileEntry(
+			groupId, folderId, title);
+
+		_checkFileEntry(fileEntry, httpServletRequest);
+
+		httpServletResponse.setHeader(
+			HttpHeaders.CACHE_CONTROL,
+			FileEntryHttpHeaderCustomizerUtil.getHttpHeaderValue(
+				fileEntry, HttpHeaders.CACHE_CONTROL,
+				HttpHeaders.CACHE_CONTROL_PRIVATE_VALUE));
+
+		String contentDispositionType = null;
+
+		if (ServletResponseUtil.isBrowserExecutableContentType(
+				fileEntry.getMimeType(), fileEntry.getTitle())) {
+
+			contentDispositionType = HttpHeaders.CONTENT_DISPOSITION_ATTACHMENT;
+		}
+
+		ServletResponseUtil.sendFile(
+			null, httpServletResponse, fileEntry.getTitle(),
+			fileEntry.getContentStream(), fileEntry.getSize(),
+			fileEntry.getMimeType(), contentDispositionType);
 	}
 
 	protected void sendFile(
@@ -1243,9 +1280,13 @@ public class WebServerServlet extends HttpServlet {
 
 		String cacheControlValue = HttpHeaders.CACHE_CONTROL_PRIVATE_VALUE;
 
+		boolean browserExecutable =
+			ServletResponseUtil.isBrowserExecutableContentType(
+				contentType, fileName);
+
 		boolean download = ParamUtil.getBoolean(httpServletRequest, "download");
 
-		if (_isBrowserExecutableContentType(contentType)) {
+		if (browserExecutable) {
 			download = true;
 		}
 
@@ -1264,7 +1305,7 @@ public class WebServerServlet extends HttpServlet {
 		_sendObjectEntryAttachmentDownloadMessage(
 			fileEntry, httpServletRequest, user);
 
-		if (isSupportsRangeHeader(contentType)) {
+		if (!browserExecutable && isSupportsRangeHeader(contentType)) {
 			ServletResponseUtil.sendFileWithRangeHeader(
 				httpServletRequest, httpServletResponse, fileName, inputStream,
 				contentLength, contentType);
@@ -1282,30 +1323,6 @@ public class WebServerServlet extends HttpServlet {
 					inputStream, contentLength, contentType);
 			}
 		}
-	}
-
-	protected void sendFile(
-			HttpServletResponse httpServletResponse, User user, long groupId,
-			long folderId, String title)
-		throws Exception {
-
-		FileEntry fileEntry = DLAppLocalServiceUtil.getFileEntry(
-			groupId, folderId, title);
-
-		httpServletResponse.setHeader(
-			HttpHeaders.CACHE_CONTROL,
-			FileEntryHttpHeaderCustomizerUtil.getHttpHeaderValue(
-				fileEntry, HttpHeaders.CACHE_CONTROL,
-				HttpHeaders.CACHE_CONTROL_PRIVATE_VALUE));
-
-		String contentDispositionType =
-			_isBrowserExecutableContentType(fileEntry.getMimeType()) ?
-				HttpHeaders.CONTENT_DISPOSITION_ATTACHMENT : null;
-
-		ServletResponseUtil.sendFile(
-			null, httpServletResponse, fileEntry.getTitle(),
-			fileEntry.getContentStream(), fileEntry.getSize(),
-			fileEntry.getMimeType(), contentDispositionType);
 	}
 
 	protected void sendGroups(
@@ -1405,7 +1422,10 @@ public class WebServerServlet extends HttpServlet {
 
 		String mimeType = fileEntry.getMimeType();
 
-		if (download || !mimeType.startsWith("image/")) {
+		if (download || !mimeType.startsWith("image/") ||
+			ServletResponseUtil.isBrowserExecutableContentType(
+				mimeType, fileName)) {
+
 			ServletResponseUtil.sendFile(
 				httpServletRequest, httpServletResponse, fileName,
 				fileEntry.getContentStream(), fileEntry.getSize(), mimeType,
@@ -1442,12 +1462,16 @@ public class WebServerServlet extends HttpServlet {
 		long groupId = ParamUtil.getLong(httpServletRequest, "groupId");
 		String uuid = ParamUtil.getString(httpServletRequest, "uuid");
 
+		String contentDispositionType = null;
+
 		if ((groupId > 0) && Validator.isNotNull(uuid) &&
-			_isBrowserExecutableContentType(contentType)) {
+			ServletResponseUtil.isBrowserExecutableContentType(
+				contentType, fileName)) {
+
+			contentDispositionType = HttpHeaders.CONTENT_DISPOSITION_ATTACHMENT;
 
 			httpServletResponse.setHeader(
-				HttpHeaders.CONTENT_DISPOSITION,
-				HttpHeaders.CONTENT_DISPOSITION_ATTACHMENT);
+				HttpHeaders.CONTENT_DISPOSITION, contentDispositionType);
 		}
 
 		byte[] bytes = getImageBytes(httpServletRequest, image);
@@ -1456,7 +1480,7 @@ public class WebServerServlet extends HttpServlet {
 			if (Validator.isNotNull(fileName)) {
 				ServletResponseUtil.sendFile(
 					httpServletRequest, httpServletResponse, fileName, bytes,
-					contentType);
+					contentType, contentDispositionType);
 			}
 			else {
 				ServletResponseUtil.write(httpServletResponse, bytes);
@@ -1992,11 +2016,6 @@ public class WebServerServlet extends HttpServlet {
 			FileEntry.class.getName(), PortletProvider.Action.VIEW);
 	}
 
-	private boolean _isBrowserExecutableContentType(String contentType) {
-		return _browserExecutableContentTypes.contains(
-			StringUtil.toLowerCase(contentType));
-	}
-
 	private boolean _isImageTokenAccepted(
 		HttpServletRequest httpServletRequest, long imageId) {
 
@@ -2024,6 +2043,21 @@ public class WebServerServlet extends HttpServlet {
 				StringBundler.concat(
 					"Image ", imageId,
 					" was requested without a valid \"t\" parameter"));
+		}
+
+		return false;
+	}
+
+	private boolean _isLayoutSetLogo(
+		HttpServletRequest httpServletRequest, long imageId) {
+
+		String path = GetterUtil.getString(httpServletRequest.getPathInfo());
+
+		if (path.startsWith("/layout_set_logo") &&
+			(LayoutSetLocalServiceUtil.fetchLayoutSetByLogoId(false, imageId) !=
+				null)) {
+
+			return true;
 		}
 
 		return false;
@@ -2150,11 +2184,6 @@ public class WebServerServlet extends HttpServlet {
 
 	private static final Set<String> _acceptRangesMimeTypes = SetUtil.fromArray(
 		PropsValues.WEB_SERVER_SERVLET_ACCEPT_RANGES_MIME_TYPES);
-	private static final Set<String> _browserExecutableContentTypes =
-		SetUtil.fromArray(
-			ContentTypes.APPLICATION_JAVASCRIPT, ContentTypes.IMAGE_SVG_XML,
-			ContentTypes.TEXT_HTML, ContentTypes.TEXT_JAVASCRIPT,
-			"application/xhtml+xml");
 	private static final Snapshot<FileEntryFriendlyURLResolver>
 		_fileEntryFriendlyURLResolverSnapshot = new Snapshot<>(
 			WebServerServlet.class, FileEntryFriendlyURLResolver.class);

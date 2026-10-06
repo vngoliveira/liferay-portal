@@ -111,6 +111,7 @@ import com.liferay.portal.kernel.portlet.UserAttributes;
 import com.liferay.portal.kernel.portlet.url.builder.PortletURLBuilder;
 import com.liferay.portal.kernel.redirect.RedirectURLSettingsUtil;
 import com.liferay.portal.kernel.security.ChecksumUtil;
+import com.liferay.portal.kernel.security.SecureRandomUtil;
 import com.liferay.portal.kernel.security.auth.AlwaysAllowDoAsUser;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.security.auth.FullNameGenerator;
@@ -277,6 +278,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -1325,8 +1327,6 @@ public class PortalImpl implements Portal {
 
 		List<LayoutFriendlyURL> layoutFriendlyURLs = null;
 
-		String groupFriendlyURLPrefix = null;
-
 		if (replaceFriendlyURL) {
 			layoutFriendlyURLs =
 				LayoutFriendlyURLLocalServiceUtil.getLayoutFriendlyURLs(
@@ -1336,12 +1336,6 @@ public class PortalImpl implements Portal {
 				VirtualLayout virtualLayout = (VirtualLayout)layout;
 
 				layout = virtualLayout.getSourceLayout();
-
-				Group group = layout.getGroup();
-
-				groupFriendlyURLPrefix =
-					VirtualLayoutConstants.CANONICAL_URL_SEPARATOR.concat(
-						group.getFriendlyURL());
 			}
 		}
 
@@ -1375,7 +1369,10 @@ public class PortalImpl implements Portal {
 					FriendlyURLResolverRegistryUtil.getURLSeparators();
 
 				for (String urlSeparator : urlSeparators) {
-					if (!currentURL.startsWith(urlSeparator)) {
+					if (!currentURL.startsWith(urlSeparator) ||
+						urlSeparator.equals(
+							VirtualLayoutConstants.CANONICAL_URL_SEPARATOR)) {
+
 						continue;
 					}
 
@@ -1430,16 +1427,11 @@ public class PortalImpl implements Portal {
 
 						friendlyURL = layoutFriendlyURL.getFriendlyURL();
 
-						if (groupFriendlyURLPrefix != null) {
-							friendlyURL = groupFriendlyURLPrefix.concat(
-								friendlyURL);
-						}
-
 						break;
 					}
 
 					if (friendlyURL != null) {
-						alternateURLSuffix = StringUtil.replaceFirst(
+						alternateURLSuffix = StringUtil.replaceLast(
 							alternateURLSuffix, layout.getFriendlyURL(),
 							friendlyURL);
 					}
@@ -5013,6 +5005,12 @@ public class PortalImpl implements Portal {
 	}
 
 	@Override
+	public String getUniqueElementId() {
+		return _UNIQUE_ELEMENT_ID_PREFIX.concat(
+			Long.toHexString(_uniqueElementIdCounter.incrementAndGet()));
+	}
+
+	@Override
 	public String getUniqueElementId(
 		HttpServletRequest httpServletRequest, String namespace,
 		String elementId) {
@@ -5178,9 +5176,12 @@ public class PortalImpl implements Portal {
 			String remoteUser = httpServletRequest.getRemoteUser();
 
 			if ((remoteUser == null) && !PropsValues.PORTAL_JAAS_ENABLE) {
-				HttpSession httpSession = httpServletRequest.getSession();
+				HttpSession httpSession = httpServletRequest.getSession(false);
 
-				remoteUser = (String)httpSession.getAttribute("j_remoteuser");
+				if (httpSession != null) {
+					remoteUser = (String)httpSession.getAttribute(
+						"j_remoteuser");
+				}
 			}
 
 			if (remoteUser == null) {
@@ -5295,14 +5296,16 @@ public class PortalImpl implements Portal {
 			}
 		}
 
-		HttpSession httpSession = httpServletRequest.getSession();
+		HttpSession httpSession = httpServletRequest.getSession(false);
 
-		userIdObj = (Long)httpSession.getAttribute(WebKeys.USER_ID);
+		if (httpSession != null) {
+			userIdObj = (Long)httpSession.getAttribute(WebKeys.USER_ID);
 
-		if (userIdObj != null) {
-			httpServletRequest.setAttribute(WebKeys.USER_ID, userIdObj);
+			if (userIdObj != null) {
+				httpServletRequest.setAttribute(WebKeys.USER_ID, userIdObj);
 
-			return userIdObj.longValue();
+				return userIdObj.longValue();
+			}
 		}
 
 		return 0;
@@ -6901,7 +6904,7 @@ public class PortalImpl implements Portal {
 
 		if (portletCategory.equals(PortletCategoryKeys.CONTROL_PANEL_APPS) ||
 			portletCategory.equals(
-				PortletCategoryKeys.CONTROL_PANEL_CONFIGURATION) ||
+				PortletCategoryKeys.CONTROL_PANEL_INSTANCE) ||
 			portletCategory.equals(PortletCategoryKeys.CONTROL_PANEL_SITES) ||
 			portletCategory.equals(PortletCategoryKeys.CONTROL_PANEL_SYSTEM) ||
 			portletCategory.equals(PortletCategoryKeys.CONTROL_PANEL_USERS) ||
@@ -8614,6 +8617,9 @@ public class PortalImpl implements Portal {
 
 	private static final String _UNICODE_REPLACEMENT_CHARACTER = "\uFFFD";
 
+	private static final String _UNIQUE_ELEMENT_ID_PREFIX =
+		Long.toHexString(SecureRandomUtil.nextLong()) + StringPool.DASH;
+
 	private static final Log _log = LogFactoryUtil.getLog(PortalImpl.class);
 
 	private static final Pattern _bannedResourceIdPattern = Pattern.compile(
@@ -8625,6 +8631,7 @@ public class PortalImpl implements Portal {
 		new ConcurrentHashMap<>();
 	private static final MethodHandler _resetCDNHostsMethodHandler =
 		new MethodHandler(new MethodKey(PortalUtil.class, "resetCDNHosts"));
+	private static final AtomicLong _uniqueElementIdCounter = new AtomicLong();
 	private static final Date _upTime = new Date();
 	private static final Log _webServerServletLog = LogFactoryUtil.getLog(
 		WebServerServlet.class);

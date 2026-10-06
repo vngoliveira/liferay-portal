@@ -2,10 +2,11 @@ import * as API from 'shared/api';
 import * as data from 'test/data';
 import List from '../List';
 import mockStore, {mockStoreData, mockStoreDataLDP} from 'test/mock-store';
+import ModalRenderer from 'shared/components/ModalRenderer';
 import React from 'react';
 import {act} from '@testing-library/react';
 import {ChannelContext} from 'shared/context/channel';
-import {cleanup, render, screen, within} from '@testing-library/react';
+import {cleanup, fireEvent, render, screen, within} from '@testing-library/react';
 import {formatDateToTimeZone, getCustomDateTimeFormat} from 'shared/util/date';
 import {getTimestamp} from 'test/data';
 import {MemoryRouter, Route, Routes as RouterRoutes} from 'react-router-dom';
@@ -31,6 +32,8 @@ const DefaultComponent = ({
 	...otherProps
 }) => (
 	<Provider store={mockStore(storeData)}>
+		<ModalRenderer />
+
 		<MemoryRouter
 			initialEntries={[
 				`/workspace/23/123/contacts/segments${queryString}`
@@ -380,6 +383,46 @@ describe('List', () => {
 		).toBeInTheDocument();
 	});
 
+	it('renders the last membership update date with the custom date time format', async () => {
+		API.projects.fetchFeatureUsages.mockResolvedValueOnce([]);
+		API.individualSegment.search.mockReturnValue(
+			Promise.resolve(
+				data.mockSearch(data.mockSegment, 1, {
+					lastMembershipUpdateDate: Date.UTC(2026, 5, 10, 14, 30)
+				})
+			)
+		);
+
+		render(<DefaultComponent />);
+
+		await waitForLoadingToBeRemoved(document.body);
+
+		const row = screen.getByText('Seattle0').closest('tr');
+
+		expect(
+			within(row).getByText('Jun 10, 2026, 2:30 PM')
+		).toBeInTheDocument();
+	});
+
+	it('renders the modified date with the custom date format', async () => {
+		API.projects.fetchFeatureUsages.mockResolvedValueOnce([]);
+		API.individualSegment.search.mockReturnValue(
+			Promise.resolve(
+				data.mockSearch(data.mockSegment, 1, {
+					dateModified: Date.UTC(2026, 5, 9, 23, 45)
+				})
+			)
+		);
+
+		render(<DefaultComponent />);
+
+		await waitForLoadingToBeRemoved(document.body);
+
+		const row = screen.getByText('Seattle0').closest('tr');
+
+		expect(within(row).getByText('Jun 9, 2026')).toBeInTheDocument();
+	});
+
 	it('shows the last membership update date as processing while it is not available', async () => {
 		API.projects.fetchFeatureUsages.mockResolvedValueOnce([]);
 		API.individualSegment.search.mockReturnValue(
@@ -397,5 +440,27 @@ describe('List', () => {
 		const row = screen.getByText('Seattle0').closest('tr');
 
 		expect(within(row).getAllByText('Processing')).toHaveLength(2);
+	});
+
+	it('opens the manage notifications modal from the row actions', async () => {
+		API.individualSegment.search.mockReturnValue(
+			Promise.resolve(data.mockSearch(data.mockSegment, 1))
+		);
+
+		render(<DefaultComponent />);
+
+		await waitForLoadingToBeRemoved(document.body);
+
+		const row = screen.getByText('Seattle0').closest('tr');
+
+		fireEvent.click(within(row).getByRole('button', {name: 'Menu'}));
+
+		fireEvent.click(
+			screen.getByRole('menuitem', {name: 'Manage Notifications'})
+		);
+
+		expect(
+			screen.getByText('Manage Segment Notifications')
+		).toBeInTheDocument();
 	});
 });
